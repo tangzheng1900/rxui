@@ -6,5 +6,5 @@ src/*
 tags/*
 .history
 .vscode/
-build/
+scripts/
 package-lock.json

@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "./types.d.ts",
   "scripts": {
-    "build": "webpack --config ./build/webpack.build.js",
+    "build": "webpack --config ./scripts/webpack.build.js",
     "prepublish": " "
   },
   "keywords": [
