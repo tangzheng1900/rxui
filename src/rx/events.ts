@@ -1,0 +1,40 @@
+﻿export const ReactEvents = ['onContextMenu',
+  'onClick',
+  'onDoubleClick',
+  'onMouseDown',
+  'onMouseUp',
+  'onMouseEnter',
+  'onMouseLeave',
+  'onMouseMove',
+  'onMouseOut',
+  'onMouseOver',
+  'onDrop',
+  'onDrag',
+  'onDragStart',
+  'onDragEnd',
+  'onDragEnter',
+  'onDragLeave',
+  'onDragOver',
+  'onDragExit',
+
+  'onTouchStart',
+  'onTouchEnd',
+  'onTouchMove',
+  'onTouchCancel',
+
+  'onKeyPress',
+  'onKeyDown',
+  'onKeyUp',
+
+  'onCopy',
+  'onCut',
+  'onPaste',
+
+  'onChange',
+  'onInput',
+  'onSubmit',
+
+  'onFocus',
+  'onBlur',
+
+  'onScroll']

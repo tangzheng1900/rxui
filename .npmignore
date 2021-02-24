@@ -1,0 +1,10 @@
+.git/
+.idea/
+.DS_Store
+node_modules/*
+src/*
+tags/*
+.history
+.vscode/
+build/
+package-lock.json
