@@ -271,7 +271,7 @@ function searchGetter(type, typeClass, direction, node, pro) {
     //return proxy&&proxy[pro]
 
     if (proxy === void 0) {
-      throw new ObservableNotFoundErr(`No Observable(${typeClass.name}) found in parents components.`)
+      //throw new ObservableNotFoundErr(`No Observable(${typeClass.name}) found in parents components.`)
     } else {
       return proxy[pro]
     }

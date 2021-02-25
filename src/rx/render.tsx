@@ -4,7 +4,6 @@ import {render as reactDomRender, Renderer} from 'react-dom'
 import {ReactEvents} from './events'
 import {regGlobalObject, uuid} from '../util';
 import {T_NodeInfo} from '../../types';
-import {RXUI_APPEND} from "./observable";
 
 const {ReactCurrentDispatcher} = React['__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'];//Sorry bro,i have to use this fucking API
 
@@ -75,6 +74,12 @@ function enhance<T extends object>(component: React.FunctionComponent<T>) {
                 Responsive.setCurUpdater(oriUpdater)
               }
 
+              // if(rtn===void 0||rtn===null){
+              //   rtn = React.createElement(React.Fragment)
+              // }
+
+              //console.log(rtn)
+
               return rtn
             }, other)
           }
@@ -110,6 +115,10 @@ function enhance<T extends object>(component: React.FunctionComponent<T>) {
       rtn = component(props, ref)
     } catch (ex) {
       rtn = onError('render', props, ex)
+    }
+
+    if(rtn===void 0||rtn===null){
+      rtn = React.createElement(React.Fragment)
     }
 
     if (oriUseEffectFn) {

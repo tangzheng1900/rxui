@@ -123,26 +123,26 @@ function hashcodeFn<T>(fn: Clz, name, load?) {
 
   return proxyFn
 }
-
-function setMetaWithType(args, key, val?, typeDescr?) {
-  let fn = function (target: Function, name: string) {
-    let td = typeDescr && typeof (typeDescr) == 'function' ? typeDescr(target, name) : (typeDescr || 'design:type')
-    let dt = Reflect.getMetadata(td, target, name)
-    if (!dt) {
-      dt = Reflect.getMetadata(td, target.constructor, name)
-    }
-    setMeta(target.constructor, key, name, val ? Object.assign({type: dt}, val) : {type: dt})
-    return;
-  }
-  if (args.length == 3
-    && (typeof (args[0]) == 'object' && typeof (args[0]['constructor']) == 'function'//Instance property
-      || typeof (args[0]) == 'function')//Class property
-    && typeof (args[1]) == 'string') {//None parameters
-    fn(...args)
-  } else {
-    return fn
-  }
-}
+//
+// function setMetaWithType(args, key, val?, typeDescr?) {
+//   let fn = function (target: Function, name: string) {
+//     let td = typeDescr && typeof (typeDescr) == 'function' ? typeDescr(target, name) : (typeDescr || 'design:type')
+//     let dt = Reflect.getMetadata(td, target, name)
+//     if (!dt) {
+//       dt = Reflect.getMetadata(td, target.constructor, name)
+//     }
+//     setMeta(target.constructor, key, name, val ? Object.assign({type: dt}, val) : {type: dt})
+//     return;
+//   }
+//   if (args.length == 3
+//     && (typeof (args[0]) == 'object' && typeof (args[0]['constructor']) == 'function'//Instance property
+//       || typeof (args[0]) == 'function')//Class property
+//     && typeof (args[1]) == 'string') {//None parameters
+//     fn(...args)
+//   } else {
+//     return fn
+//   }
+// }
 
 function setMeta(fn: Function, nm: string, prop, val?) {
   const fary = Object.getOwnPropertyNames(fn).filter(nm => nm == MetaKey)
