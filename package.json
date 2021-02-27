@@ -1,7 +1,7 @@
 {
-  "name": "@visualbricks/rxui",
-  "version": "1.0.1",
-  "description": "A framework for react",
+  "name": "@mybricks/rxui",
+  "version": "1.0.0",
+  "description": "A responsive framework for react UI",
   "main": "index.js",
   "types": "./types.d.ts",
   "scripts": {
