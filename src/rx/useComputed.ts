@@ -1,46 +1,52 @@
-﻿import {useCallback, useMemo, useRef, useState} from 'react';
+﻿import {useMemo, useState} from 'react';
 import {Responsive} from './responsive';
 import {CurrentNodeInfo, PARENT_NODE_INFO} from './render';
 
 export default function useComputed<T>(fn: () => T): T {
-  const ref = useRef({c: 0, fn})
   const [, refresh] = useState<number>()
 
   const preListener = Responsive.getCurUpdater()
 
-  const curFiber = CurrentNodeInfo.current
+  const ref: { c: number, updater, fn: Function } = useMemo(() => {
+    return {
+      c: 0,
+      fn,
+      updater: {
+        _from_: 'useComputed',
+        component: preListener.component,
+        hoc: fn,
+        fiber: CurrentNodeInfo.current,
+        update: function () {
+          //try{
+          refresh(ref.c++)
+          // }catch(ex){
+          //   console.log(fn,curFiber)
+          //   //debugger
+          // }
 
-  const updater = {
-    component: preListener.component,
-    hoc: ref.current.fn,
-    fiber: curFiber,
-    update: function () {
-      //try{
-      refresh(ref.current.c++)
-      // }catch(ex){
-      //   console.log(fn,curFiber)
-      //   //debugger
-      // }
 
-
-      // const curUpdater = Responsive.getCurUpdater()
-      // if (curUpdater && curUpdater.fiber.id !== this.fiber.id) {//Warning: Cannot update a component (`DesnCom`) while rendering a different component (`WithFrames`).
-      //   setTimeout(() => {
-      //     if(!this.fiber.invalid){
-      //       debugger
-      //       console.log(curUpdater.fiber,this.fiber)
-      //       refresh(ref.current.c++)
-      //     }else{
-      //       debugger
-      //     }
-      //   })
-      // } else {
-      //   refresh(ref.current.c++)
-      // }
+          // const curUpdater = Responsive.getCurUpdater()
+          // if (curUpdater && curUpdater.fiber.id !== this.fiber.id) {//Warning: Cannot update a component (`DesnCom`) while rendering a different component (`WithFrames`).
+          //   setTimeout(() => {
+          //     if(!this.fiber.invalid){
+          //       debugger
+          //       console.log(curUpdater.fiber,this.fiber)
+          //       refresh(ref.current.c++)
+          //     }else{
+          //       debugger
+          //     }
+          //   })
+          // } else {
+          //   refresh(ref.current.c++)
+          // }
+        }
+      }
     }
-  }
+  }, [])
 
-  const cacheFn = useCallback<T>((...args) => {
+  const rtn = useMemo(() => {
+    const updater = ref.updater
+
     Responsive.setCurUpdater(updater)
     let rtn
     try {
@@ -56,9 +62,7 @@ export default function useComputed<T>(fn: () => T): T {
     }
 
     return rtn
-  }, [ref.current.c])
-
-  const rtn = useMemo(cacheFn, [ref.current.c])
+  }, [ref.c])
 
   return rtn as T
 }
@@ -66,11 +70,11 @@ export default function useComputed<T>(fn: () => T): T {
 function onError(stage: 'render' | 'usememo' | 'useEffect', props, ex: Error) {
   if (props && (typeof props['_onError_'] == 'function' || typeof props['_onerror_'] == 'function')) {
     return (props['_onError_'] || props['_onerror_'])(ex, stage)
-  }else{
+  } else {
     const parentInfo = props[PARENT_NODE_INFO]
-    if(parentInfo) {
+    if (parentInfo) {
       const parentObj = Responsive.searchNode(parentInfo)
-      if(parentObj.props){
+      if (parentObj.props) {
         return onError(stage, parentObj.props, ex)
       }
     }

@@ -289,6 +289,8 @@ export namespace Responsive {
               //if (!curNodeInfo) {//When curNodeInfo&&updater.fiber !== curNodeInfo,it will showing warnning error
               //updater.update(updater)
 
+              //console.log(property)
+
               if (updater && updater.fiber && !updater.fiber.invalid) {
                 updater.reason = `[${updater.fiber.id}]${reason}`
 

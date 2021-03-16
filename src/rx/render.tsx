@@ -11,7 +11,7 @@ const PARENT_NODEINFO_ID = '_cur_parent_info_'
 export const PARENT_NODE_INFO = '_parent_info_'
 const RENDER_IN_NODEINFO = '_render_in_node_info_'
 
-export const CurrentNodeInfo: { current: T_NodeInfo } = regGlobalObject('CurrentNodeInfo', {})
+export const CurrentNodeInfo: { current: T_NodeInfo } = regGlobalObject('CurrentNodeInfo', {} as any)
 
 function enhance<T extends object>(component: React.FunctionComponent<T>) {
   function hoc(props, ref) {

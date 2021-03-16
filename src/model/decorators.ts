@@ -89,18 +89,21 @@ function hashcodeFn<T>(fn: Clz, name, load?) {
 
           Object.setPrototypeOf(_this,proto)
           return _this
-        }catch(noSupportFuckingES6){
-          var args = []
-          for(var i=0;i<arguments.length;i++){
-            args.push(arguments[i])
-          }
-          fn.apply(this,args)
+        }catch(ex){//not support ES6?
+          throw ex
           
-          Object.defineProperty(this, '${HASHCODE}', {
-              value:getUid('${fnName}_'),
-              writable: true,
-              enumerable:false
-          })
+          // var args = []
+          //
+          // for(var i=0;i<arguments.length;i++){
+          //   args.push(arguments[i])
+          // }
+          // fn.apply(this,args)
+          //
+          // Object.defineProperty(this, '${HASHCODE}', {
+          //     value:getUid('${fnName}_'),
+          //     writable: true,
+          //     enumerable:false
+          // })
         }
       }
       proto = {

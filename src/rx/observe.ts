@@ -1,8 +1,7 @@
 ﻿import {T_ObserverCfg} from '../../types'
 import {useCallback, useEffect, useRef} from 'react'
 import {Responsive} from './responsive'
-import {isObservable, pushWatcher, RXUI_APPEND} from "./observable";
-import getCurNode = Responsive.getCurNode;
+import {isObservable, pushWatcher} from "./observable";
 import {ObservableNotFoundErr} from "./errors";
 
 type T_RefType = { proxy: {}, watcherPushed: {}, implVal: {} }
@@ -87,7 +86,8 @@ export default function observe<T>(typeClass, impl, config: T_ObserverCfg, updat
           || pro === Symbol.toPrimitive
           || pro === Symbol.toStringTag
           || pro === Symbol.iterator
-          || pro === RXUI_APPEND) {
+          //|| pro === RXUI_APPEND
+        ) {
           return target[pro]
         }
 

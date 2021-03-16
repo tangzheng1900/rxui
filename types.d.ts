@@ -1,10 +1,11 @@
 ﻿/**
- * RXUI
+ * RXUI for react UI
  *
  *
  * @author: CheMingjun(chemingjun@126.com)
  */
 import React, {FunctionComponent} from 'react';
+import {Renderer} from "react-dom";
 
 export * from './src/index'
 
@@ -12,14 +13,10 @@ export type T_NodeInfo = {
   id: string,
   component: FunctionComponent,
   name: string,
-  props:{},
+  props: {},
   parent: T_NodeInfo,
-  invalid?:boolean
+  invalid?: boolean
   computedUpdaterAry?: T_Updater[]
-}
-
-export type T_Observable = {
-  _isExpectTo_: T_EmitToObserver | undefined
 }
 
 export type T_ComNode = {
@@ -31,7 +28,7 @@ export type T_ComNode = {
   subjectAry: Array<{ type: Function, proxy: object, direction: T_EmitToObserver }>,
   observerAry: Array<{ type: Function, proxy: object, direction: T_EmitToObserver }>,
   invalid?: boolean
-  props?:{}
+  props?: {}
 }
 
 export type T_Updater = {
@@ -61,7 +58,13 @@ export type T_ObserverCfg = {
   // }
 }
 
+//type Impl<T, P extends keyof T> = (next: (val: { [key in P]: T[key] }) => any) => (T | void)
+
 type Impl<T, P extends keyof T> = (next: (val: { [key in P]: T[key] }) => any) => (T | void)
+
+export function render(...args): Renderer
+
+export function useComputed<T>(fn: () => T): T
 
 export function useObservable<T>(typeClass: (new () => T) | T): T
 export function useObservable<T>(typeClass: (new () => T) | T, updater: any[]): T
@@ -71,18 +74,18 @@ export function useObservable<T>(typeClass: (new () => T) | T, config: T_Observa
 export function useObservable<T>(typeClass: (new () => T) | T, config: T_ObservableCfg<T>, updater?: any[]): T
 export function useObservable<T>(typeClass: (new () => T) | T, config: T_ObservableCfg<T>, serailizedId?: string, updater?: any[]): T
 
-export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T>, serailizedId?: string): T
-export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T>, serailizedId?: string, updater?: any[]): T
-export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T>, config: T_ObservableCfg<T>, serailizedId?: string): T
-export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T>, updater?: any[]): T
-export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T>, config: T_ObservableCfg<T>, updater?: any[]): T
-export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T>, config: T_ObservableCfg<T>, serailizedId?: string, updater?: any[]): T
+export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T, {}>, serailizedId?: string): T
+export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T, {}>, serailizedId?: string, updater?: any[]): T
+export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T, {}>, config: T_ObservableCfg<T>, serailizedId?: string): T
+export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T, {}>, updater?: any[]): T
+export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T, {}>, config: T_ObservableCfg<T>, updater?: any[]): T
+export function useObservable<T>(typeClass: (new () => T) | T, implement: Impl<T, {}>, config: T_ObservableCfg<T>, serailizedId?: string, updater?: any[]): T
 
 export function observe<T>(typeClass: new() => T): T
-export function observe<T>(typeClass: new() => T, implement: Impl<T>): T
-export function observe<T>(typeClass: new() => T, config: T_ObserverCfg<T>): T
-export function observe<T>(typeClass: new() => T, implement: Impl<T>, config: T_ObserverCfg<T>): T
-export function observe<T>(typeClass: new() => T, implement: Impl<T>, config: T_ObserverCfg<T>, updater: any[]): T
+export function observe<T>(typeClass: new() => T, implement: Impl<T, {}>): T
+export function observe<T>(typeClass: new() => T, config: T_ObserverCfg): T
+export function observe<T>(typeClass: new() => T, implement: Impl<T, {}>, config: T_ObserverCfg): T
+export function observe<T>(typeClass: new() => T, implement: Impl<T, {}>, config: T_ObserverCfg, updater: any[]): T
 
 export function useWatcher(target: {},
                            on: string,

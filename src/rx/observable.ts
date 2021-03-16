@@ -13,18 +13,18 @@ const METHOD_PUSH_WATCH = '__pushWatch__'
 const METHOD_PUSH_JOIN_FROM = '__pushJoinFrom__'
 const METHOD_PUSH_JOIN_TO = '__pushJoinTo__'
 
-export const RXUI_APPEND = '__rxui__'
+//export const RXUI_APPEND = '__rxui__'
 
 type T_Watcher = { on: string, exe: Function, node: T_ComNode, target: {} }
 
 type T_ProxyNode = { source: {}, proxy: {}, parent: T_ProxyNode }
 
-const watcherReg = new WeakMap<{}, Set>()
-
+const proxyReg = new WeakMap<{}, {}>()
+const watcherReg = new WeakMap<{}, Set<{}>>()
 const watchAntiShaking = antiShaking()
 
 export default function observable<T>(source: (new() => T) | T, typeClass: object = source,
-                                      config?: T_ObservableCfg, thenEmitToFn?: Function): T {
+                                      config?: T_ObservableCfg<any>, thenEmitToFn?: Function): T {
   if (typeof source === 'function') {
     source = new source()
   }
@@ -98,7 +98,15 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
             return val
           }
 
-          rtnVal = appendRXUIVal(val, 'proxy', fn)
+          rtnVal = proxyReg.get(val)
+          if (rtnVal === void 0) {
+            proxyReg.set(val, rtnVal = fn())
+          }
+          // else{
+          //   debugger
+          // }
+
+          //rtnVal = appendRXUIVal(val, 'proxy', fn)
         }
 
         return rtnVal
@@ -125,9 +133,6 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
           || prop === '$$typeof'
           || prop === 'constructor'
           || isSymbol(prop)) {
-          // if(prop==='toJSON'){
-          //   debugger
-          // }
           return target[prop]
         }
         if (prop === PROP_ORIGINAL) {
@@ -271,21 +276,25 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
             return value
           }
 
-          if (Array.isArray(value)) {
-            const oriVal = getOriginal(value)
-            const map = appendRXUIVal(oriVal, 'updaters', () => new Map())
-            let set = map.get(agent)
-            if (!set) {
-              map.set(agent, set = new Set())/////TODO
-            }
-            if (!set.has(prop)) {
-              set.add(prop)
-            }
-          }
+          // if (Array.isArray(value)) {
+          //   const oriVal = getOriginal(value)
+          //   const map = appendRXUIVal(oriVal, 'updaters', () => new Map())
+          //   let set = map.get(agent)
+          //   if (!set) {
+          //     map.set(agent, set = new Set())/////TODO
+          //   }
+          //   if (!set.has(prop)) {
+          //     set.add(prop)
+          //   }
+          // }
 
           if (typeof value === 'object'
             && value
-            && !(value instanceof HTMLElement || value instanceof SVGElement || value instanceof RegExp)) {
+            && !(value instanceof HTMLElement
+              || value instanceof SVGElement
+              || value instanceof RegExp
+              || value['$$typeof']//React element
+            )) {
             return ValCache.get(prop, value,
               () => {
                 return proxy(value, curProxyNode, namespace)
@@ -301,8 +310,12 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
           return true
         }
 
+        // if(prop==='length'){
+        //   debugger
+        // }
+
         const preVal = target[prop]
-        if (preVal !== value) {
+        if (preVal !== value || (Array.isArray(target) && prop && prop === 'length')) {
           const namespace = parentNS + '.' + prop
 
           if (snap) {
@@ -310,7 +323,6 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
             let notIgnore = !(mmetas && mmetas[prop])
             //if (notIgnore && (!curXpath && props[prop] || curXpath)) {
             if (notIgnore) {
-              //debugger
               snap.setUndo(receiver, prop, preVal)
             }
           }
@@ -323,10 +335,6 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
           }
 
           doWatch(curProxyNode, namespace, prop, value, preVal)
-
-          // if(prop==='activeDesigner'){
-          //   debugger
-          // }
 
           agent.update(namespace, prop, value)
 
@@ -375,17 +383,17 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
           }
 
           if (Array.isArray(target) && prop.match(/^(\d+)|length$/)) {
-            const map = appendRXUIVal(getOriginal(target), 'updaters')
+            //const map = appendRXUIVal(getOriginal(target), 'updaters')
 
             //const map = updaterReg.get(getOriginal(target))
 
-            if (map) {
-              map.forEach((set, agent: any) => {
-                set.forEach(prop => {
-                  agent.update(namespace, prop, value)
-                })
-              })
-            }
+            // if (map) {
+            //   map.forEach((set, agent: any) => {
+            //     set.forEach(prop => {
+            //       agent.update(namespace, prop, value)
+            //     })
+            //   })
+            // }
             const aryPropName = parentNS.match(/\.([^\.]+)$/)?.[1]
             doWatch(curProxyNode, parentNS, aryPropName, target, target)
           }
@@ -430,42 +438,44 @@ export function pushJoinFrom(toOne, fromOne, mapping) {
 
 //const appendCache = regGlobalObject('appendCache',new WeakMap<{}, {}>())
 
-function appendRXUIVal(val, prop, fn?) {
-  let rtnVal
-  let append = val[RXUI_APPEND]
-  // if(append===void 0){
-  //   append = appendCache.get(val)
-  // }
-  if (append === void 0) {
-    //if (Object.isExtensible(val)) {
-    try {
-      Object.defineProperty(val, RXUI_APPEND, {
-        value: append = {},
-        writable: false,
-        enumerable: false,
-        configurable: true
-      })
-    } catch (ex) {
-      return val
-      // debugger
-      // append = {}
-      // appendCache.set(val,append)
-    }
-
-    // }else{
-    //   debugger
-    // }
-  }
-
-  if (append) {
-    rtnVal = append[prop]
-    if (!rtnVal && typeof fn === 'function') {
-      append[prop] = rtnVal = fn()
-    }
-  }
-
-  return rtnVal
-}
+// function appendRXUIVal(val, prop, fn?) {
+//   let rtnVal
+//   let append = val[RXUI_APPEND]
+//   // if(append===void 0){
+//   //   append = appendCache.get(val)
+//   // }
+//   if (append === void 0) {
+//     //if (Object.isExtensible(val)) {
+//     try {
+//       Object.defineProperty(val, RXUI_APPEND, {
+//         value: append = {},
+//         writable: false,
+//         enumerable: false,
+//         configurable: true
+//       })
+//     } catch (ex) {
+//       return val
+//       // debugger
+//       // append = {}
+//       // appendCache.set(val,append)
+//     }
+//
+//     // }else{
+//     //   debugger
+//     // }
+//   }
+//
+//   if (append) {
+//     rtnVal = append[prop]
+//     if (!rtnVal && typeof fn === 'function') {
+//       append[prop] = rtnVal = fn()
+//     }
+//   }
+//
+//   return fn()
+//
+//   return rtnVal
+// }
 
 function findImplInPipe(typeClass, pro, thenEmitTo, args) {
   if (thenEmitTo.direction === 'parents') {
