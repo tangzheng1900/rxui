@@ -105,15 +105,24 @@ export namespace Responsive {
   }
 
   export function setCurUpdater(updater: T_Updater) {
-    curUpdater.cur = updater
+    if (curUpdater) {
+      curUpdater.cur = updater
+    }
   }
 
   export function getCurUpdater(): T_Updater {
-    return curUpdater.cur
+    if (curUpdater) {
+      return curUpdater.cur
+    }
   }
 
   export function igonreObservableBefore() {
-    curUpdater = {}
+    //curUpdater = {}
+
+    curUpdater = void 0
+    Promise.resolve().then(() => {
+      curUpdater = {}
+    })
   }
 
   export function cleanUpdater(updater: T_Updater) {
@@ -190,7 +199,7 @@ export namespace Responsive {
                 //   debugger
                 // }
                 updater.update()
-              }else{
+              } else {
                 // console.warn(updater.reason)
               }
               //queue[idx] = void 0

@@ -140,10 +140,12 @@ function deserialize({refs, didMap}, serial, ref?) {
       return ref || serial
     }
     const refKey = serial[KEY_REF]
-    // if (refKey === 'Singleton_diw9') {
-    //   debugger
-    // }
     if (typeof (refKey) == 'string') {//Ref to an object
+      // if (refKey.match(/DiagramModel_.*/gi)) {
+      //   console.log(SerializedReg)
+      //   debugger
+      // }
+
       if (!ref && didMap[refKey]) {
         return didMap[refKey];
       }
@@ -178,6 +180,11 @@ function deserialize({refs, didMap}, serial, ref?) {
       if (props.length > 0) {
         const metaIgnore = serialData[META_IGNORE]
         props.forEach(prop => {
+
+          // if(prop==='diagramAry'){
+          //   debugger
+          // }
+
           if (prop === META_IGNORE) {
             return;
           }
