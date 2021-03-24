@@ -1,4 +1,4 @@
-﻿import React, {memo, useCallback, useEffect, useMemo, useState} from 'react'
+﻿import React, {memo, ReactElement, useCallback, useEffect, useMemo, useState} from 'react'
 import {Responsive} from './responsive'
 import {render as reactDomRender, Renderer} from 'react-dom'
 import {ReactEvents} from './events'
@@ -117,7 +117,7 @@ function enhance<T extends object>(component: React.FunctionComponent<T>) {
       rtn = onError('render', props, ex)
     }
 
-    if(rtn===void 0||rtn===null){
+    if (rtn === void 0 || rtn === null) {
       rtn = React.createElement(React.Fragment)
     }
 
@@ -144,12 +144,12 @@ function enhance<T extends object>(component: React.FunctionComponent<T>) {
 function onError(stage: 'render' | 'usememo' | 'useEffect', props, ex: Error) {
   if (props && (typeof props['_onError_'] == 'function' || typeof props['_onerror_'] == 'function')) {
     return (props['_onError_'] || props['_onerror_'])(ex, stage)
-  }else{
+  } else {
     const parentInfo = props[PARENT_NODE_INFO]
-    if(parentInfo){
+    if (parentInfo) {
       const parentObj = Responsive.searchNode(parentInfo)
-      if(parentObj.props){
-        return onError(stage,parentObj.props, ex)
+      if (parentObj.props) {
+        return onError(stage, parentObj.props, ex)
       }
     }
     throw ex
@@ -190,7 +190,7 @@ function useForceUpdate(component: React.FunctionComponent) {
 
 let initCreateElement = false
 
-export default function render(...args): Renderer {
+function myRender(render, ...args): Renderer {
   if (!initCreateElement) {//Singleton guarantee
     initCreateElement = true
     let ceFn = React.createElement as Function
@@ -256,14 +256,98 @@ export default function render(...args): Renderer {
     }
   }
 
-  return reactDomRender.call(void 0, ...args) as any
+  return render.call(void 0, ...args) as any
 }
+
+type RXUIRender = {
+  test:
+    (render: Function, com: ReactElement) => Renderer
+} & { (...args): Renderer }
+
+const render: RXUIRender = function render(...args) {
+  return myRender(reactDomRender, ...args)
+} as RXUIRender
+
+render.test = function (render, com) {
+  return myRender(render, com)
+}
+
+export default render
+
+
+// export function renderTest(com, render): Renderer {
+//   if (!initCreateElement) {//Singleton guarantee
+//     initCreateElement = true
+//     let ceFn = React.createElement as Function
+//     React.createElement = function (...args) {
+//       let fn
+//       if (args.length > 0 && typeof (fn = args[0]) === 'function') {
+//         if (!(fn.prototype instanceof React.Component)) {//not class based
+//           const enCom = enhanceComponent(fn)
+//           args.splice(0, 1, enCom)
+//
+//           const prop = args[1] || {}
+//
+//           Object.defineProperty(prop, PARENT_NODE_INFO, {
+//             value: React.createElement[PARENT_NODEINFO_ID],
+//             writable: false,
+//             enumerable: true,
+//             configurable: false
+//           })
+//
+//           //prop[PARENT_NODE_INFO] = React.createElement[PARENT_NODEINFO_ID]
+//           args.splice(1, 1, prop as any)
+//         }
+//         return ceFn(...args)
+//       } else {
+//         if (typeof args[0] === 'string') {//Normal element
+//           const props = args[1] as object
+//           if (props) {
+//             const curNodeInfo = React.createElement[RENDER_IN_NODEINFO]
+//             if (curNodeInfo) {
+//               const infoId = curNodeInfo.id
+//               ReactEvents.forEach(event => {
+//                 let fn = props[event]
+//                 if (typeof fn === 'function') {
+//                   props[event] = function (...args) {
+//                     Responsive.curRT.setNodeInfoId(infoId)
+//                     const rtn = fn(...args)
+//                     Responsive.curRT.clear()//Cancel it
+//                     return rtn
+//                   }
+//                 }
+//               })
+//             }
+//           }
+//         } else {
+//           // if(args&&args[1]&&typeof(args[1])==='object'&&args[1]['form']){
+//           //   let F = args[0]
+//           //   args[0] = useMemo(()=>args[0],[])
+//           //   //debugger
+//           // }
+//
+//         }
+//         return ceFn(...args)
+//       }
+//     }
+//   }
+//
+//   const enCom = enhanceComponent(com)
+//
+//   return render(enCom) as any
+// }
+
 
 function enhanceComponent(fn: React.FunctionComponent) {
   const key = '_observed_'
   let obFn = fn[key]
   if (!obFn) {
-    obFn = fn[key] = enhance(fn)
+    obFn = enhance(fn)
+    try {
+      fn[key] = obFn
+    } catch (ex) {
+
+    }
   }
 
   const props = Object.getOwnPropertyNames(fn)

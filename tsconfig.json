@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "module": "es2015",
     "target": "es2015",
     "lib": [
       "dom",
@@ -15,25 +14,26 @@
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": false,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "noImplicitAny": false,
     "jsx": "react",
     "baseUrl": ".",
     "paths": {
-      "rxui": [
-        "src/index"
-      ],
-      "rxui/dom": [
-        "src/dom"
-      ],
-      "rxui/model": [
-        "src/model"
+      "@mybricks/rxui": [
+        "types.d.ts"
       ]
-    }
+    },
+    "types": [
+      "jest","es6-promise"
+    ],
+    "typeRoots": [
+      "../node_modules/@types"
+    ]
   },
   "exclude": [
     "./node_modules"

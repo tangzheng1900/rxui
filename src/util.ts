@@ -117,6 +117,7 @@ export function antiShaking() {
 
 export function regGlobalObject<T>(name, val: T): T {
   const GLOBAL = window || global
+
   let rtn: T
   if (GLOBAL) {
     let grxui = GLOBAL['__rxui__']

@@ -1,2 +1,2 @@
-# @visualbricks/rxui
-React响应式开发
+# @mybricks/rxui
+> Responsive framework for React programing，like the Mobx but not only Mobx

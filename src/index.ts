@@ -7,12 +7,16 @@ import observe from './rx/observe'
 import from from './rx/from'
 import render from './rx/render'
 
+import {renderTest} from './rx/render'
+
 import {Responsive} from './rx/responsive'
 
 const igonreObservableBefore = Responsive.igonreObservableBefore
 
 export {igonreObservableBefore, render, useObservable, useComputed, useWatcher, useOnce, observe, observable, from}
 export {undo, redo, takeSnap} from './rx/undo-redo'
+
+export {renderTest}
 
 //-------------------------------------------------------------------------
 

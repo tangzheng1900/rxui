@@ -24,7 +24,7 @@ export namespace Responsive {
       delaiedRtNodeInfoId = curRtNodeInfoId
     },
     getNode(): T_ComNode {
-      const curNodeInfo = CurrentNodeInfo.current
+      const curNodeInfo = CurrentNodeInfo.current/////TODO
       if (curNodeInfo) {
         return nodes[curNodeInfo.id]
       }
@@ -79,8 +79,7 @@ export namespace Responsive {
   export function regListener(type: 'subject' | 'observer', obj?): T_ComNode {
     const curNodeInfo = CurrentNodeInfo.current
     if (!curNodeInfo) {
-      debugger
-      throw new Error(`CurrentNodeInfo not found.`)
+      throw new Error(`CurrentNodeInfo.current is undefined.`)
     }
 
     const node = searchNode(curNodeInfo.id)
@@ -117,12 +116,12 @@ export namespace Responsive {
   }
 
   export function igonreObservableBefore() {
-    //curUpdater = {}
+    curUpdater = {}
 
-    curUpdater = void 0
-    Promise.resolve().then(() => {
-      curUpdater = {}
-    })
+    //curUpdater = void 0
+    // Promise.resolve().then(() => {
+    //   curUpdater = {}
+    // })
   }
 
   export function cleanUpdater(updater: T_Updater) {
