@@ -1,6 +1,6 @@
 ﻿import React, {memo, ReactElement, useCallback, useEffect, useMemo, useState} from 'react'
 import {Responsive} from './responsive'
-import {render as reactDomRender, Renderer} from 'react-dom'
+import {render as reactDomRender, Renderer, unstable_batchedUpdates} from 'react-dom'
 import {ReactEvents} from './events'
 import {regGlobalObject, uuid} from '../util';
 import {T_NodeInfo} from '../../types';
@@ -95,7 +95,9 @@ function enhance<T extends object>(component: React.FunctionComponent<T>) {
               Responsive.curRT.setNodeInfoId(curNodeInfo.id)
               let rtn
               try {
+                //unstable_batchedUpdates(() => {
                 rtn = fn(...args)
+                //})
               } catch (ex) {
                 onError('useEffect', props, ex)
               } finally {
@@ -190,7 +192,7 @@ function useForceUpdate(component: React.FunctionComponent) {
 
 let initCreateElement = false
 
-function myRender(render, ...args): Renderer {
+function realRender(render, ...args): Renderer {
   if (!initCreateElement) {//Singleton guarantee
     initCreateElement = true
     let ceFn = React.createElement as Function
@@ -226,7 +228,11 @@ function myRender(render, ...args): Renderer {
                 if (typeof fn === 'function') {
                   props[event] = function (...args) {
                     Responsive.curRT.setNodeInfoId(infoId)
-                    const rtn = fn(...args)
+                    let rtn
+                    unstable_batchedUpdates(() => {
+                      //console.log(Math.random())
+                      rtn = fn(...args)
+                    })
                     Responsive.curRT.clear()//Cancel it
                     return rtn
                   }
@@ -247,12 +253,23 @@ function myRender(render, ...args): Renderer {
     }
   }
 
-  let fn
   if (args.length > 0) {
-    if (typeof (fn = args[0]) === 'function' ||
-      typeof args[0] === 'object' && typeof (fn = args[0]['type']) === 'function') {
-      const enCom = enhanceComponent(fn)
-      args.splice(0, 1, React.createElement(enCom))
+    const arg0 = args[0]
+    if (arg0) {
+      let comDef
+      if (typeof arg0 === 'function') {//Component
+        comDef = arg0
+      } else if (typeof arg0 === 'object') {
+        if (typeof arg0.type === 'function') {
+          comDef = arg0.type
+        } else {
+          throw new Error(`Invalid render type,expect HTMLTag | FunctionComponent | Function.`)
+        }
+      }
+      if (comDef) {
+        const enCom = enhanceComponent(comDef)
+        args.splice(0, 1, React.createElement(enCom))
+      }
     }
   }
 
@@ -261,82 +278,18 @@ function myRender(render, ...args): Renderer {
 
 type RXUIRender = {
   test:
-    (render: Function, com: ReactElement) => Renderer
+    (render: Function, com: ReactElement | { (): ReactElement }) => Renderer
 } & { (...args): Renderer }
 
 const render: RXUIRender = function render(...args) {
-  return myRender(reactDomRender, ...args)
+  return realRender(reactDomRender, ...args)
 } as RXUIRender
 
 render.test = function (render, com) {
-  return myRender(render, com)
+  return realRender(render, com)
 }
 
 export default render
-
-
-// export function renderTest(com, render): Renderer {
-//   if (!initCreateElement) {//Singleton guarantee
-//     initCreateElement = true
-//     let ceFn = React.createElement as Function
-//     React.createElement = function (...args) {
-//       let fn
-//       if (args.length > 0 && typeof (fn = args[0]) === 'function') {
-//         if (!(fn.prototype instanceof React.Component)) {//not class based
-//           const enCom = enhanceComponent(fn)
-//           args.splice(0, 1, enCom)
-//
-//           const prop = args[1] || {}
-//
-//           Object.defineProperty(prop, PARENT_NODE_INFO, {
-//             value: React.createElement[PARENT_NODEINFO_ID],
-//             writable: false,
-//             enumerable: true,
-//             configurable: false
-//           })
-//
-//           //prop[PARENT_NODE_INFO] = React.createElement[PARENT_NODEINFO_ID]
-//           args.splice(1, 1, prop as any)
-//         }
-//         return ceFn(...args)
-//       } else {
-//         if (typeof args[0] === 'string') {//Normal element
-//           const props = args[1] as object
-//           if (props) {
-//             const curNodeInfo = React.createElement[RENDER_IN_NODEINFO]
-//             if (curNodeInfo) {
-//               const infoId = curNodeInfo.id
-//               ReactEvents.forEach(event => {
-//                 let fn = props[event]
-//                 if (typeof fn === 'function') {
-//                   props[event] = function (...args) {
-//                     Responsive.curRT.setNodeInfoId(infoId)
-//                     const rtn = fn(...args)
-//                     Responsive.curRT.clear()//Cancel it
-//                     return rtn
-//                   }
-//                 }
-//               })
-//             }
-//           }
-//         } else {
-//           // if(args&&args[1]&&typeof(args[1])==='object'&&args[1]['form']){
-//           //   let F = args[0]
-//           //   args[0] = useMemo(()=>args[0],[])
-//           //   //debugger
-//           // }
-//
-//         }
-//         return ceFn(...args)
-//       }
-//     }
-//   }
-//
-//   const enCom = enhanceComponent(com)
-//
-//   return render(enCom) as any
-// }
-
 
 function enhanceComponent(fn: React.FunctionComponent) {
   const key = '_observed_'

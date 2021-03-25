@@ -3,9 +3,9 @@
 module.exports = {
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
-    // alias: {
-    //   'rxui': require('path').resolve(__dirname, '../rxui/src/')
-    // },
+    alias: {
+      '@mybricks/rxui': require('path').resolve(__dirname, '../src/')
+    },
   },
   module: {
     rules: [

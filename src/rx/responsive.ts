@@ -1,12 +1,15 @@
 ﻿import {T_ComNode, T_NodeInfo, T_Updater} from '../../types'
 import {CurrentNodeInfo} from './render';
 import {regGlobalObject} from "../util";
+import {unstable_batchedUpdates} from "react-dom";
 
 const nodes: { [index: string]: T_ComNode } = regGlobalObject('nodes', {})
 
 //const updaterAry: Array<{ [index: string]: Array<T_Updater> }> = []
 
 //const updaterReg:WeakMap<T_Updater
+
+//console.log(33)
 
 let nodesTree = null
 
@@ -191,18 +194,22 @@ export namespace Responsive {
           Promise.resolve().then(() => {
             lock = void 0
             //console.time('totalTime')
-            queue.forEach((updater, idx) => {
-              queue[idx] = void 0
-              if (updater && updater.fiber && !updater.fiber.invalid) {
-                // if(updater.reason&&updater.reason.indexOf(`.moduleNav[0].slot.comAry[0].debugs.UNDEFINED_FRAME_LABEL`)!==-1){
-                //   debugger
-                // }
-                updater.update()
-              } else {
-                // console.warn(updater.reason)
-              }
-              //queue[idx] = void 0
-            })
+
+            //unstable_batchedUpdates(() => {
+              queue.forEach((updater, idx) => {
+                queue[idx] = void 0
+                if (updater && updater.fiber && !updater.fiber.invalid) {
+                  // if(updater.reason&&updater.reason.indexOf(`.moduleNav[0].slot.comAry[0].debugs.UNDEFINED_FRAME_LABEL`)!==-1){
+                  //   debugger
+                  // }
+                  updater.update()
+                } else {
+                  // console.warn(updater.reason)
+                }
+                //queue[idx] = void 0
+              })
+            //})
+
             //console.timeEnd('totalTime')
             queue = queue.filter(up => up)
             //console.log(queue.length)
@@ -292,55 +299,62 @@ export namespace Responsive {
         } else {
           let ary
           if (ary = updaters[property]) {
-            updaters[property] = ary.map((updater: T_Updater) => {
-              //if (!curNodeInfo || curNodeInfo&&updater.fiber !== curNodeInfo) {//Ignore updating in current fiber
-              //if (!curNodeInfo) {//When curNodeInfo&&updater.fiber !== curNodeInfo,it will showing warnning error
-              //updater.update(updater)
+            unstable_batchedUpdates(()=>{
+              updaters[property] = ary.map((updater: T_Updater) => {
+                //if (!curNodeInfo || curNodeInfo&&updater.fiber !== curNodeInfo) {//Ignore updating in current fiber
+                //if (!curNodeInfo) {//When curNodeInfo&&updater.fiber !== curNodeInfo,it will showing warnning error
+                //updater.update(updater)
 
-              //console.log(property)
+                //console.log(property)
 
-              if (updater && updater.fiber && !updater.fiber.invalid) {
-                updater.reason = `[${updater.fiber.id}]${reason}`
+                if (updater && updater.fiber && !updater.fiber.invalid) {
+                  updater.reason = `[${updater.fiber.id}]${reason}`
 
-                const curUpdater = Responsive.getCurUpdater()
+                  const curUpdater = Responsive.getCurUpdater()
 
-                // if(curUpdater){
-                //   if(curUpdater.fiber.id !== updater.fiber.id){
-                //     if (curRtNodeInfoId && curRtNodeInfoId === updater.fiber.id) {//In event
-                //       updater.update(updater)
-                //       //UpdateAsyn.push(updater)
-                //     } else {
-                //       UpdateAsyn.push(updater)
-                //     }
-                //   }else{//same
-                //
-                //   }
-                // }else{
-                //   updater.update(updater)
-                // }
+                  // if(curUpdater){
+                  //   if(curUpdater.fiber.id !== updater.fiber.id){
+                  //     if (curRtNodeInfoId && curRtNodeInfoId === updater.fiber.id) {//In event
+                  //       updater.update(updater)
+                  //       //UpdateAsyn.push(updater)
+                  //     } else {
+                  //       UpdateAsyn.push(updater)
+                  //     }
+                  //   }else{//same
+                  //
+                  //   }
+                  // }else{
+                  //   updater.update(updater)
+                  // }
 
-                if (curUpdater && curUpdater === updater) {//In same updater(useComputed)
-                  //console.log(Math.random())
-                  //debugger
+                  if (curUpdater && curUpdater === updater) {//In same updater(useComputed)
+                    //console.log(Math.random())
+                    //debugger
+                    //console.log(Math.random())
+                    //return//TODO TEST
+                  }
+
+                  //updater.update(updater)
+
+                  if (curUpdater && curUpdater.fiber.id !== updater.fiber.id) {
+                    if (curRtNodeInfoId && curRtNodeInfoId === updater.fiber.id) {//In event
+                      updater.update(updater)
+                      //UpdateAsyn.push(updater)
+                    } else {
+                      //console.log(Math.random())
+                      UpdateAsyn.push(updater)
+                    }
+                  } else {
+                    updater.update(updater)
+                  }
+                  return updater
+                } else {
+                  //console.log(updater)
                   return
                 }
+              }).filter(updater => updater)
+            })
 
-                if (curUpdater && curUpdater.fiber.id !== updater.fiber.id) {
-                  if (curRtNodeInfoId && curRtNodeInfoId === updater.fiber.id) {//In event
-                    updater.update(updater)
-                    //UpdateAsyn.push(updater)
-                  } else {
-                    UpdateAsyn.push(updater)
-                  }
-                } else {
-                  updater.update(updater)
-                }
-                return updater
-              } else {
-                //console.log(updater)
-                return
-              }
-            }).filter(updater => updater)
             if (updaters[property].length === 0) {
               updaters[property] = void 0
               delete updaters[property]

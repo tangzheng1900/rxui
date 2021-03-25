@@ -1,12 +1,14 @@
 {
   "name": "@mybricks/rxui",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "Responsive framework for React programing，like the Mobx but not only Mobx",
   "main": "index.js",
   "types": "./types.d.ts",
   "scripts": {
-    "test": "jest",
+    "test": "jest --config ./tests/jest.config.js --rootDir . --watch",
+    "test-dev": "jest --config ./tests/jest.config.js --rootDir . --watch",
     "build": "webpack --config ./scripts/webpack.build.js",
+    "build-test": "jest-webpack --config ./tests/jest.config.js --rootDir .",
     "prepublish": " "
   },
   "keywords": [
