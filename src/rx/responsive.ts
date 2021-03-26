@@ -5,12 +5,6 @@ import {unstable_batchedUpdates} from "react-dom";
 
 const nodes: { [index: string]: T_ComNode } = regGlobalObject('nodes', {})
 
-//const updaterAry: Array<{ [index: string]: Array<T_Updater> }> = []
-
-//const updaterReg:WeakMap<T_Updater
-
-//console.log(33)
-
 let nodesTree = null
 
 let curRtNodeInfoId
@@ -196,18 +190,18 @@ export namespace Responsive {
             //console.time('totalTime')
 
             //unstable_batchedUpdates(() => {
-              queue.forEach((updater, idx) => {
-                queue[idx] = void 0
-                if (updater && updater.fiber && !updater.fiber.invalid) {
-                  // if(updater.reason&&updater.reason.indexOf(`.moduleNav[0].slot.comAry[0].debugs.UNDEFINED_FRAME_LABEL`)!==-1){
-                  //   debugger
-                  // }
-                  updater.update()
-                } else {
-                  // console.warn(updater.reason)
-                }
-                //queue[idx] = void 0
-              })
+            queue.forEach((updater, idx) => {
+              queue[idx] = void 0
+              if (updater && updater.fiber && !updater.fiber.invalid) {
+                // if(updater.reason&&updater.reason.indexOf(`.moduleNav[0].slot.comAry[0].debugs.UNDEFINED_FRAME_LABEL`)!==-1){
+                //   debugger
+                // }
+                updater.update()
+              } else {
+                // console.warn(updater.reason)
+              }
+              //queue[idx] = void 0
+            })
             //})
 
             //console.timeEnd('totalTime')
@@ -299,14 +293,8 @@ export namespace Responsive {
         } else {
           let ary
           if (ary = updaters[property]) {
-            unstable_batchedUpdates(()=>{
+            unstable_batchedUpdates(() => {
               updaters[property] = ary.map((updater: T_Updater) => {
-                //if (!curNodeInfo || curNodeInfo&&updater.fiber !== curNodeInfo) {//Ignore updating in current fiber
-                //if (!curNodeInfo) {//When curNodeInfo&&updater.fiber !== curNodeInfo,it will showing warnning error
-                //updater.update(updater)
-
-                //console.log(property)
-
                 if (updater && updater.fiber && !updater.fiber.invalid) {
                   updater.reason = `[${updater.fiber.id}]${reason}`
 
@@ -333,6 +321,12 @@ export namespace Responsive {
                     //console.log(Math.random())
                     //return//TODO TEST
                   }
+
+                  if (curRtNodeInfoId && curUpdater && curUpdater === updater) {
+                    //console.log(Math.random())
+                    return//UseEffect
+                  }
+
 
                   //updater.update(updater)
 

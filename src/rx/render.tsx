@@ -190,13 +190,12 @@ function useForceUpdate(component: React.FunctionComponent) {
   }, []);
 }
 
-let initCreateElement = false
+let oriCreateElement, rxuiCreateElement
 
 function realRender(render, ...args): Renderer {
-  if (!initCreateElement) {//Singleton guarantee
-    initCreateElement = true
-    let ceFn = React.createElement as Function
-    React.createElement = function (...args) {
+  if (!oriCreateElement) {//Singleton guarantee
+    oriCreateElement = React.createElement
+    React.createElement = rxuiCreateElement = function (...args) {
       let fn
       if (args.length > 0 && typeof (fn = args[0]) === 'function') {
         if (!(fn.prototype instanceof React.Component)) {//not class based
@@ -215,7 +214,7 @@ function realRender(render, ...args): Renderer {
           //prop[PARENT_NODE_INFO] = React.createElement[PARENT_NODEINFO_ID]
           args.splice(1, 1, prop as any)
         }
-        return ceFn(...args)
+        return oriCreateElement(...args)
       } else {
         if (typeof args[0] === 'string') {//Normal element
           const props = args[1] as object
@@ -248,24 +247,34 @@ function realRender(render, ...args): Renderer {
           // }
 
         }
-        return ceFn(...args)
+        return oriCreateElement(...args)
       }
     }
   }
 
   if (args.length > 0) {
-    const arg0 = args[0]
+    let arg0 = args[0]
     if (arg0) {
+      if (typeof arg0 === 'function') {//Factory
+        React.createElement = oriCreateElement
+        try {
+          arg0 = arg0()
+        } catch (ex) {
+          throw ex
+        } finally {
+          React.createElement = rxuiCreateElement
+        }
+      }
+
       let comDef
-      if (typeof arg0 === 'function') {//Component
-        comDef = arg0
-      } else if (typeof arg0 === 'object') {
+      if (typeof arg0 === 'object') {
         if (typeof arg0.type === 'function') {
           comDef = arg0.type
         } else {
           throw new Error(`Invalid render type,expect HTMLTag | FunctionComponent | Function.`)
         }
       }
+
       if (comDef) {
         const enCom = enhanceComponent(comDef)
         args.splice(0, 1, React.createElement(enCom))

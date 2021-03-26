@@ -270,6 +270,9 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
           }
           return rtn
         } else {
+          if(prop==='options'){
+            debugger
+          }
           agent.push(namespace, prop)
 
           if (ignoreAry && ignoreAry.indexOf(prop) !== -1) {
