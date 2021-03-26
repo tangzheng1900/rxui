@@ -22,3 +22,14 @@ function App() {
   )
 }
 ```
+
+### API
+#### render
+```tsx
+import {render} from '@mybricks/rxui'
+//1.Like reactDom's render
+render(<SomCom/>,parentDom,callback)
+
+//2.Factory function
+render(comFactory,parentDom,callback)
+```
