@@ -28,7 +28,6 @@ function App() {
 #### render
 
 Type:
-
 ```tsx
 type Render = (
   renderTarget: JSX | (() => JSX),
@@ -38,9 +37,9 @@ type Render = (
 ```
 
 Demos:
-
 ```tsx
 import {render} from '@mybricks/rxui'
+
 //1.Like reactDom's render
 render(<SomCom/>, parentDom, callback)
 
