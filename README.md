@@ -27,13 +27,17 @@ function App() {
 
 #### render
 
+Type:
+
 ```tsx
-(
-  renderTarget: JSX | { (): JSX },
+type Render = (
+  renderTarget: JSX | (() => JSX),
   parentDom: HTMLElement,
   callback?: Function
 ) => void
 ```
+
+Demos:
 
 ```tsx
 import {render} from '@mybricks/rxui'
@@ -41,5 +45,5 @@ import {render} from '@mybricks/rxui'
 render(<SomCom/>, parentDom, callback)
 
 //2.Factory function
-render(comFactory, parentDom, callback)
+render(()=><SomCom/>, parentDom, callback)
 ```
