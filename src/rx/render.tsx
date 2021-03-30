@@ -204,12 +204,17 @@ function realRender(render, ...args): Renderer {
 
           const prop = args[1] || {}
 
-          Object.defineProperty(prop, PARENT_NODE_INFO, {
-            value: React.createElement[PARENT_NODEINFO_ID],
-            writable: false,
-            enumerable: true,
-            configurable: false
-          })
+          try{
+            Object.defineProperty(prop, PARENT_NODE_INFO, {
+              value: React.createElement[PARENT_NODEINFO_ID],
+              writable: false,
+              enumerable: true,
+              configurable: false
+            })
+          }catch(ex){
+            console.info(`Object.defineProperty 'PARENT_NODE_INFO' error,in object ${prop}.`)
+            //debugger
+          }
 
           //prop[PARENT_NODE_INFO] = React.createElement[PARENT_NODEINFO_ID]
           args.splice(1, 1, prop as any)
