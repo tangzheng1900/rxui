@@ -271,10 +271,11 @@ function realRender(render, ...args): Renderer {
         }
       }
 
-      let comDef
+      let comDef,props
       if (typeof arg0 === 'object') {
         if (typeof arg0.type === 'function') {
           comDef = arg0.type
+          props = arg0.props
         } else {
           throw new Error(`Invalid render type,expect HTMLTag | FunctionComponent | Function.`)
         }
@@ -282,7 +283,7 @@ function realRender(render, ...args): Renderer {
 
       if (comDef) {
         const enCom = enhanceComponent(comDef)
-        args.splice(0, 1, React.createElement(enCom))
+        args.splice(0, 1, React.createElement(enCom,props))
       }
     }
   }

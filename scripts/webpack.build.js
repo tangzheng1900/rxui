@@ -27,7 +27,7 @@ module.exports = Object.assign({
     path: path.resolve(__dirname, '..'),
     filename: './index.js',
     libraryTarget: 'umd',
-    library: '@mybricks/rxui'
+    library: 'rxui',
   },
   externals: [{
     'react': 'React',
