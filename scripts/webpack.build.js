@@ -30,8 +30,8 @@ module.exports = Object.assign({
     library: 'rxui',
   },
   externals: [{
-    'react': 'React',
-    'react-dom': 'ReactDOM'
+    'react': 'react',
+    'react-dom': 'react-dom'
   }],
   //devtool: 'cheap-module-eval-source-map',//devtool: 'cheap-source-map',
 }, baseCfg)
