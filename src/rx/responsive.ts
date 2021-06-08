@@ -46,6 +46,7 @@ export namespace Responsive {
   export function regNode(info: T_NodeInfo) {
     const node = {
       id: info.id,
+      props:info.props,
       component: info.component,
       componentName: info.name,
       parent: null,

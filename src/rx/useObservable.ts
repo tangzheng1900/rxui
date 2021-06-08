@@ -35,7 +35,8 @@ export default function useObservable<T>(typeClass, impl, config: T_ObservableCf
     if (typeof impl === 'function') {
       impl(impl => {
         if (impl && typeof impl === 'object') {
-          copyTo(impl, implVal)
+          //copyTo(impl, implVal)
+          copyTo(impl, obsValue)///TODO
           // for (let k in impl) {
           //   obsValue[k] = impl[k]
           // }
@@ -113,6 +114,9 @@ function copyTo(from, target) {
   const props = Object.getOwnPropertyNames(from)
 
   props && props.forEach(k => {
+    // if(k==='data'){
+    //   debugger
+    // }
     const tv = from[k]
     if (typeof tv === 'function') {
       if (k !== 'constructor') {
