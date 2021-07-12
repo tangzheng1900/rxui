@@ -271,15 +271,11 @@ function realRender(render, ...args): Renderer {
         }
       }
 
-      let comDef,props
-      if (typeof arg0 === 'object') {
-        if (typeof arg0.type === 'function') {
-          comDef = arg0.type
-          props = arg0.props
-        } else {
-          throw new Error(`Invalid render type,expect HTMLTag | FunctionComponent | Function.`)
-        }
-      }
+      // 第二次调用render方法时，arg0.type为Symbol(react.memo)
+      // 在开发模式，React.createElemenet方法会对type进行校验
+      // 理论上不需要再进行校验了
+      const comDef = arg0.type
+      const props = arg0.props
 
       if (comDef) {
         const enCom = enhanceComponent(comDef)
