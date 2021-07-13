@@ -1,6 +1,6 @@
 {
   "name": "@mybricks/rxui",
-  "version": "1.0.19",
+  "version": "1.0.21",
   "description": "Responsive framework for React programing，like the Mobx but not only Mobx",
   "main": "index.js",
   "types": "./types.d.ts",
