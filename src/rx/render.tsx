@@ -271,7 +271,7 @@ function realRender(render, ...args): Renderer {
         }
       }
 
-      // 第二次调用render方法时，arg0.type为Symbol(react.memo)
+      // 第二次调用render方法时，arg0.type为Symbol(react.memo)//by Yankewen
       // 在开发模式，React.createElemenet方法会对type进行校验
       // 理论上不需要再进行校验了
       const comDef = arg0.type
