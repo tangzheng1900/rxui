@@ -5,13 +5,25 @@ import useOnce from './rx/useOnce'
 import observable from './rx/observable'
 import observe from './rx/observe'
 import from from './rx/from'
+import fork from './rx/fork'
 import render from './rx/render'
 
 import {Responsive} from './rx/responsive'
 
 const igonreObservableBefore = Responsive.igonreObservableBefore
 
-export {igonreObservableBefore, render, useObservable, useComputed, useWatcher, useOnce, observe, observable, from}
+export {
+  igonreObservableBefore,
+  render,
+  useObservable,
+  useComputed,
+  useWatcher,
+  useOnce,
+  observe,
+  observable,
+  from,
+  fork
+}
 export {undo, redo, takeSnap} from './rx/undo-redo'
 
 //-------------------------------------------------------------------------
