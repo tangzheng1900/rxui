@@ -24,9 +24,11 @@ export default function fork(fromObj) {
     },
     set(target, prop: string, value, receiver) {
       if (prop in fromObj) {
-        return fromObj[prop] = value
+        fromObj[prop] = value
+        return true
       } else {
-        return my[prop] = value
+        my[prop] = value
+        return true
       }
     },
     ownKeys(target) {
