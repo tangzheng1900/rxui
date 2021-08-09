@@ -28,6 +28,12 @@ export default function fork(fromObj) {
       } else {
         return my[prop] = value
       }
+    },
+    ownKeys(target) {
+      return Reflect.ownKeys(fromObj);
+    },
+    getOwnPropertyDescriptor(target, prop) {
+      return Reflect.getOwnPropertyDescriptor(fromObj, prop)
     }
   })
 }
