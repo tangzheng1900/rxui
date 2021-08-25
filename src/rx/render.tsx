@@ -14,6 +14,11 @@ const RENDER_IN_NODEINFO = '_render_in_node_info_'
 export const CurrentNodeInfo: { current: T_NodeInfo } = regGlobalObject('CurrentNodeInfo', {} as any)
 
 function enhance<T extends object>(component: React.FunctionComponent<T>) {
+
+  component.prototype = {
+    __reactAutoBindPairs: []
+  }
+
   function hoc(props, ref) {
     const oriUpdater = Responsive.getCurUpdater()
 
@@ -198,20 +203,23 @@ function realRender(render, ...args): Renderer {
     React.createElement = rxuiCreateElement = function (...args) {
       let fn
       if (args.length > 0 && typeof (fn = args[0]) === 'function') {
-        if (!(fn.prototype instanceof React.Component)) {//not class based
+        //not class(extends React.Component) and not from create-react-class
+        if (!fn.prototype ||
+          !(fn.prototype instanceof React.Component)
+          && fn.prototype.isReactComponent === void 0) {
           const enCom = enhanceComponent(fn)
           args.splice(0, 1, enCom)
 
           const prop = args[1] || {}
 
-          try{
+          try {
             Object.defineProperty(prop, PARENT_NODE_INFO, {
               value: React.createElement[PARENT_NODEINFO_ID],
               writable: false,
               enumerable: true,
               configurable: false
             })
-          }catch(ex){
+          } catch (ex) {
             console.info(`Object.defineProperty 'PARENT_NODE_INFO' error,in object ${prop}.`)
             //debugger
           }
@@ -279,7 +287,7 @@ function realRender(render, ...args): Renderer {
 
       if (comDef) {
         const enCom = enhanceComponent(comDef)
-        args.splice(0, 1, React.createElement(enCom,props))
+        args.splice(0, 1, React.createElement(enCom, props))
       }
     }
   }
