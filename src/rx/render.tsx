@@ -205,8 +205,7 @@ function realRender(render, ...args): Renderer {
       if (args.length > 0 && typeof (fn = args[0]) === 'function') {
         //not class(extends React.Component) and not from create-react-class
         if (!fn.prototype ||
-          !(fn.prototype instanceof React.Component)
-          && fn.prototype.isReactComponent === void 0) {
+          !(fn.prototype instanceof React.Component) && fn.prototype.isReactComponent === void 0) {
           const enCom = enhanceComponent(fn)
           args.splice(0, 1, enCom)
 
