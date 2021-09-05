@@ -35,6 +35,7 @@ export default function observe<T>(typeClass, impl, config: T_ObserverCfg, updat
     // }
 
     const currentVal: T_RefType = {watcherPushed: {}} as T_RefType
+    let node
 
     if (typeof impl === 'function') {
       const tval = impl(impl => {
@@ -151,7 +152,7 @@ export default function observe<T>(typeClass, impl, config: T_ObserverCfg, updat
       }
     })
 
-    let node
+
     if (config && config.from) {
       node = Responsive.regListener('observer', {
         type: typeClass,
