@@ -5,15 +5,21 @@ import {ReactEvents} from './events'
 import {regGlobalObject, uuid} from '../util';
 import {T_NodeInfo} from '../../types';
 
-const {ReactCurrentDispatcher} = React['__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'];//Sorry bro,i have to use this fucking API
+const {ReactCurrentDispatcher,ReactCurrentOwner} = React['__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'];//Sorry bro,i have to use this fucking API
 
 const PARENT_NODEINFO_ID = '_cur_parent_info_'
 export const PARENT_NODE_INFO = '_parent_info_'
 const RENDER_IN_NODEINFO = '_render_in_node_info_'
 
+const PROP_ENHANCED = `__enhanced__`
+
 export const CurrentNodeInfo: { current: T_NodeInfo } = regGlobalObject('CurrentNodeInfo', {} as any)
 
-function enhance<T extends object>(component: React.FunctionComponent<T>) {
+function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt = true) {
+  // component.prototype = {
+  //   __reactAutoBindPairs: []
+  // }
+
   function hoc(props, ref) {
     const oriUpdater = Responsive.getCurUpdater()
 
@@ -78,8 +84,6 @@ function enhance<T extends object>(component: React.FunctionComponent<T>) {
               //   rtn = React.createElement(React.Fragment)
               // }
 
-              //console.log(rtn)
-
               return rtn
             }, other)
           }
@@ -131,15 +135,16 @@ function enhance<T extends object>(component: React.FunctionComponent<T>) {
       Responsive.setCurUpdater(oriUpdater)//recover
     }
 
-    CurrentNodeInfo.current = void 0//Clear
+    CurrentNodeInfo.current = void 0//recover//TODO test(before = void 0)
 
     React.createElement[RENDER_IN_NODEINFO] = curNodeInfo.parent
     return rtn
   }
 
   hoc.displayName = component.displayName || component.name
+  hoc._renderedByRXUI = true
 
-  return memo(hoc)
+  return memoIt ? memo(hoc) : hoc
 }
 
 
@@ -192,26 +197,71 @@ function useForceUpdate(component: React.FunctionComponent) {
 
 let oriCreateElement, rxuiCreateElement
 
+function inRXUIParent(fiber){
+  if(fiber&&fiber.return){
+    const returnType = fiber.return.type
+    if(typeof returnType==='function'&&(returnType._renderedByRXUI)){
+      return true
+    }else{
+      return inRXUIParent(fiber.return)
+    }
+  }
+}
+
 function realRender(render, ...args): Renderer {
+  const renderInRXUI = {indeed: true}
   if (!oriCreateElement) {//Singleton guarantee
     oriCreateElement = React.createElement
     React.createElement = rxuiCreateElement = function (...args) {
+      // if(args?.[0]?.name==='ColumnRender'){
+      //   debugger
+      // }
+
+      //const isInObservable = args?.[0]?.[PROP_ENHANCED]
+
+
+
+      // if(curIsRenderedByRXUI){
+      //   debugger
+      // }
+
+      //if (!renderInRXUI.indeed && !CurrentNodeInfo.current && !isInObservable) {//RXUI外部的组件
+        if (!renderInRXUI.indeed && !CurrentNodeInfo.current) {
+          //console.log(ReactCurrentOwner.current)
+          const curIsRenderedByRXUI = inRXUIParent(ReactCurrentOwner.current)
+          if(!curIsRenderedByRXUI){//RXUI外部的组件
+            return oriCreateElement(...args)
+          }
+
+
+//console.log(args)
+        // if(args[0]?.name==='RenderCom'){
+        //   console.log('---->',args[0])
+        //   debugger
+        // }
+
+      }
+      // console.log(CurrentNodeInfo.current)
+      //
+
       let fn
       if (args.length > 0 && typeof (fn = args[0]) === 'function') {
-        if (!(fn.prototype instanceof React.Component)) {//not class based
+        //not class(extends React.Component) and not from create-react-class
+        if (!fn.prototype ||
+          !(fn.prototype instanceof React.Component) && fn.prototype.isReactComponent === void 0) {
           const enCom = enhanceComponent(fn)
           args.splice(0, 1, enCom)
 
           const prop = args[1] || {}
 
-          try{
+          try {
             Object.defineProperty(prop, PARENT_NODE_INFO, {
               value: React.createElement[PARENT_NODEINFO_ID],
               writable: false,
               enumerable: true,
               configurable: false
             })
-          }catch(ex){
+          } catch (ex) {
             console.info(`Object.defineProperty 'PARENT_NODE_INFO' error,in object ${prop}.`)
             //debugger
           }
@@ -227,17 +277,25 @@ function realRender(render, ...args): Renderer {
             const curNodeInfo = React.createElement[RENDER_IN_NODEINFO]
             if (curNodeInfo) {
               const infoId = curNodeInfo.id
+              //const nodeInfoForRender = CurrentNodeInfo.current
+
               ReactEvents.forEach(event => {
                 let fn = props[event]
                 if (typeof fn === 'function') {
                   props[event] = function (...args) {
+                    const curNodeInfo = CurrentNodeInfo.current
+                    //CurrentNodeInfo.current = nodeInfoForRender
+
                     Responsive.curRT.setNodeInfoId(infoId)
+
                     let rtn
                     unstable_batchedUpdates(() => {
                       //console.log(Math.random())
                       rtn = fn(...args)
                     })
                     Responsive.curRT.clear()//Cancel it
+
+                    //CurrentNodeInfo.current = curNodeInfo
                     return rtn
                   }
                 }
@@ -279,12 +337,18 @@ function realRender(render, ...args): Renderer {
 
       if (comDef) {
         const enCom = enhanceComponent(comDef)
-        args.splice(0, 1, React.createElement(enCom,props))
+        const oprops = arg0.key?{key: arg0.key, ref: arg0.ref}:{ ref: arg0.ref}
+        const nele = React.createElement(enCom, Object.assign(oprops, props))
+
+        args.splice(0, 1, nele)
       }
     }
   }
 
-  return render.call(void 0, ...args) as any
+  const rst = render.call(void 0, ...args) as any
+
+  renderInRXUI.indeed = false
+  return rst
 }
 
 type RXUIRender = {
@@ -302,13 +366,25 @@ render.test = function (render, com) {
 
 export default render
 
-function enhanceComponent(fn: React.FunctionComponent) {
-  const key = '_observed_'
-  let obFn = fn[key]
+function enhanceComponent(fn) {
+  let isRefCom = false
+
+  let obFn = fn[PROP_ENHANCED]
+
   if (!obFn) {
-    obFn = enhance(fn)
+    if (typeof fn === 'object' && fn.$$typeof === Symbol.for('react.forward_ref')) {
+      isRefCom = true
+    }
+    if (isRefCom) {
+      fn.render = enhance(fn.render, false)
+      obFn = memo(fn)
+      //obFn = fn
+    } else {
+      obFn = enhance(fn)
+    }
+
     try {
-      fn[key] = obFn
+      fn[PROP_ENHANCED] = obFn
     } catch (ex) {
 
     }
@@ -316,7 +392,7 @@ function enhanceComponent(fn: React.FunctionComponent) {
 
   const props = Object.getOwnPropertyNames(fn)
   props && props.forEach(prop => {
-    if (!/_observed_/.test(prop)) {
+    if (new RegExp(PROP_ENHANCED).test(prop)) {
       //console.log(prop, fn[prop])
       try {
         obFn[prop] = fn[prop]
