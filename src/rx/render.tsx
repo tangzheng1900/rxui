@@ -14,11 +14,6 @@ const RENDER_IN_NODEINFO = '_render_in_node_info_'
 export const CurrentNodeInfo: { current: T_NodeInfo } = regGlobalObject('CurrentNodeInfo', {} as any)
 
 function enhance<T extends object>(component: React.FunctionComponent<T>) {
-
-  component.prototype = {
-    __reactAutoBindPairs: []
-  }
-
   function hoc(props, ref) {
     const oriUpdater = Responsive.getCurUpdater()
 
@@ -136,7 +131,7 @@ function enhance<T extends object>(component: React.FunctionComponent<T>) {
       Responsive.setCurUpdater(oriUpdater)//recover
     }
 
-    CurrentNodeInfo.current = curNodeInfo.parent//recover//TODO test(before = void 0)
+    CurrentNodeInfo.current = void 0//Clear
 
     React.createElement[RENDER_IN_NODEINFO] = curNodeInfo.parent
     return rtn
@@ -198,38 +193,25 @@ function useForceUpdate(component: React.FunctionComponent) {
 let oriCreateElement, rxuiCreateElement
 
 function realRender(render, ...args): Renderer {
-  const renderInRoot = {inRoot:true}
   if (!oriCreateElement) {//Singleton guarantee
     oriCreateElement = React.createElement
     React.createElement = rxuiCreateElement = function (...args) {
-      if(!renderInRoot.inRoot&&!CurrentNodeInfo.current){//RXUI外部的组件
-        // if(args[0]?.name==='RenderCom'){
-        //   console.log('---->',args[0])
-        //   debugger
-        // }
-        return oriCreateElement(...args)
-      }
-      // console.log(CurrentNodeInfo.current)
-      //
-
       let fn
       if (args.length > 0 && typeof (fn = args[0]) === 'function') {
-        //not class(extends React.Component) and not from create-react-class
-        if (!fn.prototype ||
-          !(fn.prototype instanceof React.Component) && fn.prototype.isReactComponent === void 0) {
+        if (!(fn.prototype instanceof React.Component)) {//not class based
           const enCom = enhanceComponent(fn)
           args.splice(0, 1, enCom)
 
           const prop = args[1] || {}
 
-          try {
+          try{
             Object.defineProperty(prop, PARENT_NODE_INFO, {
               value: React.createElement[PARENT_NODEINFO_ID],
               writable: false,
               enumerable: true,
               configurable: false
             })
-          } catch (ex) {
+          }catch(ex){
             console.info(`Object.defineProperty 'PARENT_NODE_INFO' error,in object ${prop}.`)
             //debugger
           }
@@ -245,25 +227,17 @@ function realRender(render, ...args): Renderer {
             const curNodeInfo = React.createElement[RENDER_IN_NODEINFO]
             if (curNodeInfo) {
               const infoId = curNodeInfo.id
-              const nodeInfoForRender = CurrentNodeInfo.current
-
               ReactEvents.forEach(event => {
                 let fn = props[event]
                 if (typeof fn === 'function') {
                   props[event] = function (...args) {
-                    const curNodeInfo = CurrentNodeInfo.current
-                    CurrentNodeInfo.current = nodeInfoForRender
-
                     Responsive.curRT.setNodeInfoId(infoId)
-
                     let rtn
                     unstable_batchedUpdates(() => {
                       //console.log(Math.random())
                       rtn = fn(...args)
                     })
                     Responsive.curRT.clear()//Cancel it
-
-                    CurrentNodeInfo.current = curNodeInfo
                     return rtn
                   }
                 }
@@ -305,16 +279,12 @@ function realRender(render, ...args): Renderer {
 
       if (comDef) {
         const enCom = enhanceComponent(comDef)
-        args.splice(0, 1, React.createElement(enCom, props))
+        args.splice(0, 1, React.createElement(enCom,props))
       }
     }
   }
 
-  const rst =  render.call(void 0, ...args) as any
-
-
-  renderInRoot.inRoot = false
-  return rst
+  return render.call(void 0, ...args) as any
 }
 
 type RXUIRender = {
