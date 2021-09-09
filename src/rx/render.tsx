@@ -5,7 +5,7 @@ import {ReactEvents} from './events'
 import {regGlobalObject, uuid} from '../util';
 import {T_NodeInfo} from '../../types';
 
-const {ReactCurrentDispatcher,ReactCurrentOwner} = React['__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'];//Sorry bro,i have to use this fucking API
+const {ReactCurrentDispatcher, ReactCurrentOwner} = React['__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'];//Sorry bro,i have to use this fucking API
 
 const PARENT_NODEINFO_ID = '_cur_parent_info_'
 export const PARENT_NODE_INFO = '_parent_info_'
@@ -142,11 +142,9 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
   }
 
   hoc.displayName = component.displayName || component.name
-  hoc._renderedByRXUI = true
 
   return memoIt ? memo(hoc) : hoc
 }
-
 
 function onError(stage: 'render' | 'usememo' | 'useEffect', props, ex: Error) {
   if (props && (typeof props['_onError_'] == 'function' || typeof props['_onerror_'] == 'function')) {
@@ -197,55 +195,50 @@ function useForceUpdate(component: React.FunctionComponent) {
 
 let oriCreateElement, rxuiCreateElement
 
-function inRXUIParent(fiber){
-  if(fiber&&fiber.return){
-    const returnType = fiber.return.type
-    if(typeof returnType==='function'&&(returnType._renderedByRXUI)){
-      return true
-    }else{
-      return inRXUIParent(fiber.return)
-    }
-  }
-}
+const RXUIRender = React.createContext(false);
 
 function realRender(render, ...args): Renderer {
-  const renderInRXUI = {indeed: true}
+  //const renderInRXUI = {indeed: true}
+
   if (!oriCreateElement) {//Singleton guarantee
     oriCreateElement = React.createElement
     React.createElement = rxuiCreateElement = function (...args) {
-      // if(args?.[0]?.name==='ColumnRender'){
+
+      // if(args?.[0]?.name==='Node'){
       //   debugger
       // }
 
       //const isInObservable = args?.[0]?.[PROP_ENHANCED]
 
+      if (!CurrentNodeInfo.current && !RXUIRender.Consumer._currentValue) {//RXUI外部的组件
+        //if (!renderInRXUI.indeed && !CurrentNodeInfo.current && !curIsRenderedByRXUI) {//RXUI外部的组件
 
-
-      // if(curIsRenderedByRXUI){
-      //   debugger
-      // }
-
-      //if (!renderInRXUI.indeed && !CurrentNodeInfo.current && !isInObservable) {//RXUI外部的组件
-        if (!renderInRXUI.indeed && !CurrentNodeInfo.current) {
-          //console.log(ReactCurrentOwner.current)
-          const curIsRenderedByRXUI = inRXUIParent(ReactCurrentOwner.current)
-          if(!curIsRenderedByRXUI){//RXUI外部的组件
-            return oriCreateElement(...args)
-          }
-
+        // console.log(XXContext.Consumer._currentValue)
+        // debugger
+        //
+        // XXContext.Consumer({
+        //   children:[]
+        // })
 
 //console.log(args)
         // if(args[0]?.name==='RenderCom'){
         //   console.log('---->',args[0])
         //   debugger
         // }
+        //console.log(args)
 
+        return oriCreateElement(...args)
       }
       // console.log(CurrentNodeInfo.current)
       //
 
       let fn
       if (args.length > 0 && typeof (fn = args[0]) === 'function') {
+        // if(fn.name==='CloudRender'){
+        //   debugger
+        // }
+
+
         //not class(extends React.Component) and not from create-react-class
         if (!fn.prototype ||
           !(fn.prototype instanceof React.Component) && fn.prototype.isReactComponent === void 0) {
@@ -337,8 +330,13 @@ function realRender(render, ...args): Renderer {
 
       if (comDef) {
         const enCom = enhanceComponent(comDef)
-        const oprops = arg0.key?{key: arg0.key, ref: arg0.ref}:{ ref: arg0.ref}
-        const nele = React.createElement(enCom, Object.assign(oprops, props))
+        const oprops = arg0.key ? {key: arg0.key, ref: arg0.ref} : {ref: arg0.ref}
+
+        //const nele = React.createElement(enCom, Object.assign(oprops, props))
+
+        const nele = <RXUIRender.Provider value={true}>
+          {React.createElement(enCom, Object.assign(oprops, props))}
+        </RXUIRender.Provider>
 
         args.splice(0, 1, nele)
       }
@@ -347,7 +345,7 @@ function realRender(render, ...args): Renderer {
 
   const rst = render.call(void 0, ...args) as any
 
-  renderInRXUI.indeed = false
+  //renderInRXUI.indeed = false
   return rst
 }
 
