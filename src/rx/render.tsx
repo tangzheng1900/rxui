@@ -389,15 +389,24 @@ function enhanceComponent(fn) {
   }
 
   const props = Object.getOwnPropertyNames(fn)
+
   props && props.forEach(prop => {
-    if (new RegExp(PROP_ENHANCED).test(prop)) {
-      //console.log(prop, fn[prop])
-      try {
-        obFn[prop] = fn[prop]
-      } catch (ex) {
-        console.error(ex)
-      }
+    try {
+      obFn[prop] = fn[prop]
+    } catch (ex) {
+      console.error(ex)
     }
+
+    // if (new RegExp(PROP_ENHANCED).test(prop)) {
+    //   //console.log(prop, fn[prop])
+    //   try {
+    //     obFn[prop] = fn[prop]
+    //   } catch (ex) {
+    //     console.error(ex)
+    //   }
+    // }else{
+    //   obFn[prop] = fn[prop]
+    // }
   })
 
   return obFn
