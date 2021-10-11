@@ -4,6 +4,7 @@ import {getAllProps, getPropertyDescriptor} from "../util";
 import {META_IGNORE} from "../constants";
 import {Responsive} from "../rx/responsive";
 import {clone} from "./clone";
+import {getOriginal, isObservable} from "../rx/observable";
 
 const TEMP_CONSTS_IN_REFS = '__consts__'
 
@@ -17,8 +18,11 @@ export function load(data: { [viewName: string]: { def, refs, consts } },
     throw new Error(`Invalid data format.`)
   }
 
+  if(isObservable(data)){
+    data = getOriginal(data)//Remove proxy
+  }
    //console.time('----')
-   data = JSON.parse(JSON.stringify(data))
+  data = JSON.parse(JSON.stringify(data))
   //data = clone(data)
    //console.timeEnd('----')
 

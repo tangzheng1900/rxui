@@ -9,6 +9,7 @@ export default function from(fromOne, fromProps?: string[]) {
     throw new Error(`The observable object has expectTo,join is not allowed.`)
   }
 
+
   return {
     joinTo(toOne, toProps?: string[]) {
       if (typeof toOne === 'object') {

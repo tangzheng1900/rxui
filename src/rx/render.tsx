@@ -21,8 +21,10 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
   // }
 
   function hoc(props, ref) {
-    const oriUpdater = Responsive.getCurUpdater()
-
+    const preUpdater = Responsive.getCurUpdater()//上一个组件（Parent or brother）渲染的updater
+    // if (!preUpdater) {
+    //   debugger
+    // }
     const curNodeInfo = useMemo(() => {
       const info = {
         id: uuid(),
@@ -35,6 +37,8 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
       Responsive.regNode(info)
       return info
     }, [])
+
+    //console.log('begin...',curNodeInfo.name)
 
     CurrentNodeInfo.current = curNodeInfo
 
@@ -50,7 +54,7 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
 
     useEffect(() => {
       return () => {
-        Responsive.cleanUpdater(updater)
+        Responsive.cleanUpdater(updater)//卸载时清除
       }
     }, [])
 
@@ -131,10 +135,20 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
       curDispatcher['useEffect'] = oriUseEffectFn
     }
 
-    if (oriUpdater) {
-      Responsive.setCurUpdater(oriUpdater)//recover
-    }
+    // if (preUpdater) {
+    //   //console.log(oriUpdater)
+    //   Responsive.setCurUpdater(preUpdater)//recover
+    // }else if(!curNodeInfo.parent){//Root node
+    //   Responsive.setCurUpdater(void 0)//clear TODO
+    //   console.log('clear:::>>>>',Responsive.getCurUpdater())
+    // }
 
+    useEffect(()=>{
+      Responsive.setCurUpdater(void 0)//clear TODO
+      //console.log('>>>>',Responsive.getCurUpdater())
+    },[])
+
+//console.log('finish...',curNodeInfo.name)
     CurrentNodeInfo.current = void 0//recover//TODO test(before = void 0)
 
     React.createElement[RENDER_IN_NODEINFO] = curNodeInfo.parent

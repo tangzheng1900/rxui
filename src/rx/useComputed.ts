@@ -67,7 +67,17 @@ export default function useComputed<T>(fn: () => T): T {
   return rtn as T
 }
 
+const ErrorMap = new WeakMap()
+
 function onError(stage: 'render' | 'usememo' | 'useEffect', props, ex: Error) {
+  if(ErrorMap.has(ex)){//防止error循环出现
+    console.error(ex)
+    setTimeout(v=>ErrorMap.delete(ex))
+    return
+  }else{
+    ErrorMap.set(ex,true)
+  }
+
   if (props && (typeof props['_onError_'] == 'function' || typeof props['_onerror_'] == 'function')) {
     return (props['_onError_'] || props['_onerror_'])(ex, stage)
   } else {

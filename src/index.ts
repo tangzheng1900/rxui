@@ -11,9 +11,11 @@ import render from './rx/render'
 import {Responsive} from './rx/responsive'
 
 const igonreObservableBefore = Responsive.igonreObservableBefore
+const stopListening = Responsive.stopListening
 
 export {
   igonreObservableBefore,
+  stopListening,
   render,
   useObservable,
   useComputed,

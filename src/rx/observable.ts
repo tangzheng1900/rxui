@@ -319,6 +319,7 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
 
         const preVal = target[prop]
         if (preVal !== value || (Array.isArray(target) && prop && prop === 'length')) {
+
           const namespace = parentNS + '.' + prop
 
           if (snap) {

@@ -9,6 +9,8 @@ let nodesTree = null
 
 let curRtNodeInfoId
 let delaiedRtNodeInfoId
+
+const IgnoreRx: { stopListening: boolean } = regGlobalObject('IgnoreRx', {stopListening: void 0})
 let curUpdater: { cur: T_Updater } = regGlobalObject('curUpdater', {cur: void 0})
 const batchStack: Array<Array<object>> = regGlobalObject('batchStack', [])
 
@@ -113,6 +115,15 @@ export namespace Responsive {
     }
   }
 
+  export function stopListening(fn){
+    IgnoreRx.stopListening = true
+    try{
+      fn()
+    }finally {
+      IgnoreRx.stopListening = void 0
+    }
+  }
+
   export function igonreObservableBefore() {
     curUpdater = {}
 
@@ -187,6 +198,7 @@ export namespace Responsive {
           lock = 1
 
           Promise.resolve().then(() => {
+            //stopListening(()=>{})
             lock = void 0
             //console.time('totalTime')
 
@@ -194,12 +206,12 @@ export namespace Responsive {
             queue.forEach((updater, idx) => {
               queue[idx] = void 0
               if (updater && updater.fiber && !updater.fiber.invalid) {
-                // if(updater.reason&&updater.reason.indexOf(`.moduleNav[0].slot.comAry[0].debugs.UNDEFINED_FRAME_LABEL`)!==-1){
+                // if(updater.warcher&&updater.warcher.indexOf(`.moduleNav[0].slot.comAry[0].debugs.UNDEFINED_FRAME_LABEL`)!==-1){
                 //   debugger
                 // }
                 updater.update()
               } else {
-                // console.warn(updater.reason)
+                // console.warn(updater.warcher)
               }
               //queue[idx] = void 0
             })
@@ -228,6 +240,10 @@ export namespace Responsive {
 
     const agent = {
       push(namespace: string, property: string) {
+        if(IgnoreRx.stopListening){
+          return
+        }
+
         // if(property==='pageId'){
         //   debugger
         // }
@@ -239,6 +255,10 @@ export namespace Responsive {
         const curUpdater = Responsive.getCurUpdater()
 
         if (curUpdater) {
+          if(namespace.indexOf('.mainModule.frame.diagramAry[0].conAry[0]._finishPo')!==-1&&curUpdater.component.name==='Toolbar'){
+            debugger
+          }
+
           let ti
           if (!ary.find((updater, idx) => {
             if (isSameHoc(updater, curUpdater)) {
@@ -269,14 +289,15 @@ export namespace Responsive {
         }
       },
       update(namespace: string, property: string, value: any) {
+
         // if(property==='pageId'){
         //   debugger
         // }
 
-        const reason = namespace + '=>' +
+        const warcherDesc = namespace + '=' +
           (typeof (value) === 'function' ? 'function' : typeof (value) === 'object' ? '{..}' : value)
 
-        // if(reason.endsWith(`display=>block`)){
+        // if(warcher.endsWith(`display=>block`)){
         //   debugger
         // }
 
@@ -286,7 +307,7 @@ export namespace Responsive {
           if (upAry && upAry.length > 0) {
             upAry.forEach(updater => {
               if (!batch.find(nup => isSameHoc(nup, updater))) {
-                updater.reason = `[${updater.fiber.id}]${reason}`
+                updater.warcher = `[${updater.fiber.id}]${warcherDesc}`
                 batch.push(updater)
               }
             })
@@ -297,7 +318,7 @@ export namespace Responsive {
             unstable_batchedUpdates(() => {
               updaters[property] = ary.map((updater: T_Updater) => {
                 if (updater && updater.fiber && !updater.fiber.invalid) {
-                  updater.reason = `[${updater.fiber.id}]${reason}`
+                  updater.warcher = `[${updater.fiber.id}]${warcherDesc}`
 
                   const curUpdater = Responsive.getCurUpdater()
 

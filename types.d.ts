@@ -36,7 +36,7 @@ export type T_Updater = {
   component: React.FunctionComponent
   hoc: Function
   update: Function,
-  reason?: string
+  warcher?: string
 }
 
 export type T_EmitToObserver = 'parents' | 'children'

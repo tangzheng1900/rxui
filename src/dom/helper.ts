@@ -8,6 +8,7 @@
  * @param dragingFn invoking function
  */
 import {Responsive} from "../rx/responsive";
+import {stopListening} from "../index";
 
 interface Dragable {
   event?: object
@@ -37,10 +38,13 @@ export const dragable: Dragable = function (e, dragingFn, options?) {
       ey = e.pageY - parentPo.y;
       if (dx != 0 || dy != 0) {
         state = state ? 'moving' : 'start';
-        dragingFn({
-          po: {x, y}, epo: {ex, ey}, dpo: {dx, dy},
-          targetStyle: {x: po.x, y: po.y, w, h}
-        }, state, dom);
+
+        stopListening(()=>{
+          dragingFn({
+            po: {x, y}, epo: {ex, ey}, dpo: {dx, dy},
+            targetStyle: {x: po.x, y: po.y, w, h}
+          }, state, dom)
+        })
       }
     }
 
@@ -62,11 +66,13 @@ export const dragable: Dragable = function (e, dragingFn, options?) {
 
         handleMouseMove(e)
         if (state) {
-          dragingFn({
-              po: {x, y}, epo: {ex, ey}, dpo: {dx: 0, dy: 0},
-              targetStyle: {x: po.x, y: po.y, w, h}
-            }
-            , 'finish', dom);
+          //ignoreRx(()=>{
+            dragingFn({
+                po: {x, y}, epo: {ex, ey}, dpo: {dx: 0, dy: 0},
+                targetStyle: {x: po.x, y: po.y, w, h}
+              }
+              , 'finish', dom)
+          //})
         }
         batch.commit()
       } catch (ex) {

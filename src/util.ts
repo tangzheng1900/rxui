@@ -47,7 +47,7 @@ export function genFnName(fn: Function, className: string) {
     fnName = fn.name
   }
 
-  return fnName.replaceAll(/[^\w]/gi, '_')
+  return fnName.replace(/[^\w]/gi, '_')
 }
 
 export function getAllProps(obj, notFunction?: boolean) {
