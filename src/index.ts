@@ -1,4 +1,8 @@
-﻿import useObservable from './rx/useObservable'
+﻿import pkg from '../package.json'
+
+console.log(`--> ${pkg.name}@${pkg.version} <--`)
+
+import useObservable from './rx/useObservable'
 import useComputed from './rx/useComputed'
 import useWatcher from "./rx/useWatcher";
 import useOnce from './rx/useOnce'
