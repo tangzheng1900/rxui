@@ -240,9 +240,9 @@ export namespace Responsive {
 
     const agent = {
       push(namespace: string, property: string) {
-        if(IgnoreRx.stopListening){
-          return
-        }
+        // if(IgnoreRx.stopListening){
+        //   return
+        // }
 
         // if(property==='pageId'){
         //   debugger
@@ -255,9 +255,9 @@ export namespace Responsive {
         const curUpdater = Responsive.getCurUpdater()
 
         if (curUpdater) {
-          if(namespace.indexOf('.mainModule.frame.diagramAry[0].conAry[0]._finishPo')!==-1&&curUpdater.component.name==='Toolbar'){
-            debugger
-          }
+          // if(namespace.indexOf('.mainModule.frame.diagramAry[0].conAry[0]._finishPo')!==-1&&curUpdater.component.name==='Toolbar'){
+          //   debugger
+          // }
 
           let ti
           if (!ary.find((updater, idx) => {

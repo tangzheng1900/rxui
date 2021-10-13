@@ -1,5 +1,5 @@
 ﻿import React, {memo, ReactElement, useCallback, useEffect, useMemo, useState} from 'react'
-import {Responsive} from './responsive'
+import {getCurUpdater, Responsive} from './responsive'
 import {render as reactDomRender, Renderer, unstable_batchedUpdates} from 'react-dom'
 import {ReactEvents} from './events'
 import {regGlobalObject, uuid} from '../util';
@@ -21,7 +21,7 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
   // }
 
   function hoc(props, ref) {
-    const preUpdater = Responsive.getCurUpdater()//上一个组件（Parent or brother）渲染的updater
+    //const preUpdater = Responsive.getCurUpdater()//上一个组件（Parent or brother）渲染的updater
     // if (!preUpdater) {
     //   debugger
     // }
@@ -38,7 +38,7 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
       return info
     }, [])
 
-    //console.log('begin...',curNodeInfo.name)
+//console.log('begin...',curNodeInfo.name)
 
     CurrentNodeInfo.current = curNodeInfo
 
@@ -144,9 +144,10 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
     // }
 
     useEffect(()=>{
+//console.log('useEffect...',curNodeInfo.name)
       Responsive.setCurUpdater(void 0)//clear TODO
       //console.log('>>>>',Responsive.getCurUpdater())
-    },[])
+    })
 
 //console.log('finish...',curNodeInfo.name)
     CurrentNodeInfo.current = void 0//recover//TODO test(before = void 0)
@@ -292,7 +293,7 @@ function realRender(render, ...args): Renderer {
                   props[event] = function (...args) {
                     const curNodeInfo = CurrentNodeInfo.current
                     //CurrentNodeInfo.current = nodeInfoForRender
-
+//console.log(`Responsive.getCurUpdater()>>`,Responsive.getCurUpdater())
                     Responsive.curRT.setNodeInfoId(infoId)
 
                     let rtn
