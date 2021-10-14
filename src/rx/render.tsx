@@ -1,5 +1,5 @@
 ﻿import React, {memo, ReactElement, useCallback, useEffect, useMemo, useState} from 'react'
-import {getCurUpdater, Responsive} from './responsive'
+import {Responsive} from './responsive'
 import {render as reactDomRender, Renderer, unstable_batchedUpdates} from 'react-dom'
 import {ReactEvents} from './events'
 import {regGlobalObject, uuid} from '../util';
