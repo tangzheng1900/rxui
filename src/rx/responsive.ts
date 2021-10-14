@@ -10,7 +10,7 @@ let nodesTree = null
 let curRtNodeInfoId
 let delaiedRtNodeInfoId
 
-const IgnoreRx: { stopListening: boolean } = regGlobalObject('IgnoreRx', {stopListening: void 0})
+const IgnoreRx: { stopWatcher: boolean } = regGlobalObject('IgnoreRx', {stopWatcher: void 0})
 let curUpdater: { cur: T_Updater } = regGlobalObject('curUpdater', {cur: void 0})
 const batchStack: Array<Array<object>> = regGlobalObject('batchStack', [])
 
@@ -115,12 +115,12 @@ export namespace Responsive {
     }
   }
 
-  export function stopListening(fn){
-    IgnoreRx.stopListening = true
+  export function stopWatch(fn){
+    IgnoreRx.stopWatcher = true
     try{
-      fn()
+      return fn()
     }finally {
-      IgnoreRx.stopListening = void 0
+      IgnoreRx.stopWatcher = void 0
     }
   }
 
@@ -240,11 +240,11 @@ export namespace Responsive {
 
     const agent = {
       push(namespace: string, property: string) {
-        // if(IgnoreRx.stopListening){
-        //   return
-        // }
+        if(IgnoreRx.stopWatcher){
+          return
+        }
 
-        // if(property==='pageId'){
+        // if(property==='columns'){
         //   debugger
         // }
 
@@ -255,9 +255,9 @@ export namespace Responsive {
         const curUpdater = Responsive.getCurUpdater()
 
         if (curUpdater) {
-          // if(namespace.indexOf('.mainModule.frame.diagramAry[0].conAry[0]._finishPo')!==-1&&curUpdater.component.name==='Toolbar'){
-          //   debugger
-          // }
+          if(property==='columns'&&curUpdater.component.name==='EditView'){
+            debugger
+          }
 
           let ti
           if (!ary.find((updater, idx) => {
