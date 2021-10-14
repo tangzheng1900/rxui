@@ -255,9 +255,9 @@ export namespace Responsive {
         const curUpdater = Responsive.getCurUpdater()
 
         if (curUpdater) {
-          if(property==='columns'&&curUpdater.component.name==='EditView'){
-            debugger
-          }
+          // if(property==='columns'&&curUpdater.component.name==='EditItem'){
+          //   debugger
+          // }
 
           let ti
           if (!ary.find((updater, idx) => {

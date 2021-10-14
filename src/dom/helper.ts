@@ -8,7 +8,7 @@
  * @param dragingFn invoking function
  */
 import {Responsive} from "../rx/responsive";
-import {stopListening} from "../index";
+import {stopWatch} from "../index";
 
 interface Dragable {
   event?: object
@@ -39,7 +39,7 @@ export const dragable: Dragable = function (e, dragingFn, options?) {
       if (dx != 0 || dy != 0) {
         state = state ? 'moving' : 'start';
 
-        stopListening(()=>{
+        stopWatch(()=>{
           dragingFn({
             po: {x, y}, epo: {ex, ey}, dpo: {dx, dy},
             targetStyle: {x: po.x, y: po.y, w, h}
