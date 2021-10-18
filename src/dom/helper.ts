@@ -39,12 +39,12 @@ export const dragable: Dragable = function (e, dragingFn, options?) {
       if (dx != 0 || dy != 0) {
         state = state ? 'moving' : 'start';
 
-        stopWatch(()=>{
+        //stopWatch(()=>{
           dragingFn({
             po: {x, y}, epo: {ex, ey}, dpo: {dx, dy},
             targetStyle: {x: po.x, y: po.y, w, h}
           }, state, dom)
-        })
+        //})
       }
     }
 

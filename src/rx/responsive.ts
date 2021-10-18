@@ -54,7 +54,8 @@ export namespace Responsive {
       parent: null,
       children: [],
       subjectAry: [],
-      observerAry: []
+      observerAry: [],
+      implementAry:[]
     }
     nodes[node.id] = node
 
@@ -76,7 +77,7 @@ export namespace Responsive {
     }
   }
 
-  export function regListener(type: 'subject' | 'observer', obj?): T_ComNode {
+  export function regListener(type: 'subject' | 'observer'|'implement', obj?): T_ComNode {
     const curNodeInfo = CurrentNodeInfo.current
     if (!curNodeInfo) {
       throw new Error(`CurrentNodeInfo.current is undefined.`)

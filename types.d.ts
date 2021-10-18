@@ -51,6 +51,15 @@ export type T_ObservableCfg<T> = {
 
 export type T_ObserverCfg = {
   from?: T_EmitToObserver
+  // expectTo?: T_EmitToObserver
+  // watch?: {
+  //   on: string
+  //   exe: (prop: string, value: any, preValue?: any) => void
+  // }
+}
+
+export type T_PipeCfg = {
+  from: T_EmitToObserver
   expectTo?: T_EmitToObserver
   // watch?: {
   //   on: string

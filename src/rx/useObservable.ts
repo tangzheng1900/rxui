@@ -5,7 +5,10 @@ import {Responsive} from './responsive'
 import observable, {getOriginal} from './observable';
 import {store} from "../model/store";
 
-export default function useObservable<T>(typeClass, impl, config: T_ObservableCfg, serailId: string, updater): T {
+const IS_OBSERVABLE_PROXY_OBJECT = '__observable_proxy__'
+
+
+export default function useObservable<T>(typeClass, impl, config: T_ObservableCfg<T>, serailId: string, updater): T {
   const args = [...arguments]
   config = args.find(arg => typeof arg === 'object' ? arg : void 0)
 
@@ -133,21 +136,34 @@ function copyTo(from, target) {
   }
 }
 
+export function isObservableProxy(obj) {
+  return typeof obj === 'object' && obj && ([IS_OBSERVABLE_PROXY_OBJECT] in obj)
+}
+
+
 function proDirection(typeClass, proxyVal, direction: T_EmitToObserver | 'self') {
   if (typeof (direction) !== 'string' || !/^(children|parents|self)$/gi.test(direction)) {
     throw new Error(`direction = 'children'|'parents' expect.`)
   }
 
   const proxy = new Proxy({}, {
+    has(target, key) {
+      return key === IS_OBSERVABLE_PROXY_OBJECT
+        || key in target
+    },
     get(target, pro: string) {
       let val = proxyVal[pro]
-      if (typeof (val) === 'function') {
-        return (...args) => {
-          return val(...args)
-        }
-      } else {
-        return val
-      }
+      return val
+      // if (typeof (val) === 'function') {
+      //   if(pro==='focus'){
+      //     debugger
+      //   }
+      //   return function XXX(...args) {
+      //     return val(...args)
+      //   }
+      // } else {
+      //   return val
+      // }
     }, set(target, pro: string, val) {
       proxyVal[pro] = val
       return true

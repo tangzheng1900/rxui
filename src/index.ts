@@ -8,17 +8,18 @@ import useWatcher from "./rx/useWatcher";
 import useOnce from './rx/useOnce'
 import observable from './rx/observable'
 import observe from './rx/observe'
+import implement from './rx/implement'
 import from from './rx/from'
 import fork from './rx/fork'
 import render from './rx/render'
 
 import {Responsive} from './rx/responsive'
 
-const igonreObservableBefore = Responsive.igonreObservableBefore
+//const igonreObservableBefore = Responsive.igonreObservableBefore
 const stopWatch = Responsive.stopWatch
 
 export {
-  igonreObservableBefore,
+  //igonreObservableBefore,
   stopWatch,
   render,
   useObservable,
@@ -27,6 +28,7 @@ export {
   useOnce,
   observe,
   observable,
+  implement,
   from,
   fork
 }

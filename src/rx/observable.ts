@@ -7,6 +7,7 @@ import {META_IGNORE} from "../constants";
 import {ObservableNotFoundErr} from "./errors";
 
 const IS_OBSERVABLE_OBJECT = '__observable__'
+
 const PROP_ORIGINAL = '__original__'
 const PROP_IS_EXPECTTO = '__isExpectTo__'
 const METHOD_PUSH_WATCH = '__pushWatch__'
@@ -196,6 +197,10 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
             joinToAry.push({to, mapping})
           }
         }
+        //
+        // if(prop==='_points'){
+        //   debugger
+        // }
 
         const namespace = parentNS + (prop.match(/^\d+$/) ? `[${prop}]` : ('.' + prop))
 
@@ -212,11 +217,52 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
         }
 
         if (value === void 0 && isExpectTo && parentNS === '') {//Abstract method,invoke emitTo's implements
-          return (...args) => {
-            if (thenEmitToFn) {
-              return findImplInPipe(typeClass, prop, thenEmitToFn(), args)
+          // if(thenEmitToFn){
+          //   return (...args) => {
+          //     return findImplInPipe(typeClass, prop, thenEmitToFn(), args)
+          //   }
+          // }
+
+          agent.push(namespace, prop)
+
+          if(thenEmitToFn){
+            const fnAry = findImplInPipe(typeClass, prop, thenEmitToFn())
+
+            if(Array.isArray(fnAry)){
+              return (...args) => {
+                let ary = []
+                fnAry.forEach(processer => {
+                  ary.push(processer(...args))
+                })
+                return ary.length == 1 ? ary[0] : ary
+              }
+            }else{
+              return fnAry
             }
+
+
+            // if(typeof fnAry==='function'){
+            //   return fnAry
+            // }else if(Array.isArray(fnAry)){
+            //   return (...args) => {
+            //     let ary = []
+            //     fnAry.forEach(processer => {
+            //       ary.push(processer(...args))
+            //     })
+            //     return ary.length == 1 ? ary[0] : ary
+            //   }
+            // }
+            // return (...args) => {
+            //   return findImplInPipe(typeClass, prop, thenEmitToFn(), args)
+            // }
           }
+
+
+          // return (...args) => {
+          //   if (thenEmitToFn) {
+          //     return findImplInPipe(typeClass, prop, thenEmitToFn(), args)
+          //   }
+          // }
         } else if (typeof value == 'function') {//methods
           let rtn
           if (Array.isArray(target)) {//Array
@@ -273,6 +319,7 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
           // if(prop==='options'){
           //   debugger
           // }
+
           agent.push(namespace, prop)
 
           if (ignoreAry && ignoreAry.indexOf(prop) !== -1) {
@@ -481,13 +528,13 @@ export function pushJoinFrom(toOne, fromOne, mapping) {
 //   return rtnVal
 // }
 
-function findImplInPipe(typeClass, pro, thenEmitTo, args) {
+function findImplInPipe(typeClass, pro, thenEmitTo) {
   if (thenEmitTo.direction === 'parents') {
     let processor
     let parentNode = thenEmitTo.node.parent
     while (parentNode) {
-      if (parentNode.observerAry) {
-        if (parentNode.observerAry.find(emit => {
+      if (parentNode.implementAry) {
+        if (parentNode.implementAry.find(emit => {
           if (emit.type === typeClass && emit.direction === 'children') {
             try {
               processor = emit.proxy[pro]
@@ -507,15 +554,16 @@ function findImplInPipe(typeClass, pro, thenEmitTo, args) {
       parentNode = parentNode.parent
     }
     if (typeof processor === 'function') {
-      return processor(...args)
-    } else {
-      throw new Error(`No implements found for(${pro})`)
+      return processor
     }
+    // else {
+    //   throw new Error(`No implements found for(${pro})`)
+    // }
   } else if (thenEmitTo.direction === 'children') {
     const processerAry = [], scan = (children) => {
       if (children && children.length > 0) {
         children.forEach(node => {
-          if (!node.observerAry || !node.observerAry.find(emit => {
+          if (!node.implementAry || !node.implementAry.find(emit => {
             if (emit.type === typeClass) {
               let rst
               try {
@@ -540,13 +588,16 @@ function findImplInPipe(typeClass, pro, thenEmitTo, args) {
     scan(children)
 
     if (processerAry.length > 0) {
-      let ary = []
-      processerAry.forEach(processer => {
-        ary.push(processer(...args))
-      })
-      return ary.length == 1 ? ary[0] : ary
-    } else {
-      throw new Error(`No implements found for(${pro})`)
+      return processerAry
+
+      // let ary = []
+      // processerAry.forEach(processer => {
+      //   ary.push(processer(...args))
+      // })
+      // return ary.length == 1 ? ary[0] : ary
     }
+  // else {
+  //     throw new Error(`No implements found for(${pro})`)
+  //   }
   }
 }
