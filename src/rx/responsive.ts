@@ -93,7 +93,6 @@ export namespace Responsive {
   export function getCurNode(): T_ComNode {
     const curNodeInfo = CurrentNodeInfo.current
     if (!curNodeInfo) {
-      debugger
       throw new Error(`CurrentNodeInfo not found.`)
     }
 
@@ -290,7 +289,7 @@ export namespace Responsive {
         }
       },
       update(namespace: string, property: string, value: any) {
-
+//console.log(namespace,property,value)
         // if(property==='pageId'){
         //   debugger
         // }

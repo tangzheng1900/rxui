@@ -1,4 +1,4 @@
-﻿import React, {memo, ReactElement, useCallback, useEffect, useMemo, useState} from 'react'
+﻿import React, {memo, ReactElement, useCallback, useEffect,useLayoutEffect, useMemo, useState} from 'react'
 import {Responsive} from './responsive'
 import {render as reactDomRender, Renderer, unstable_batchedUpdates} from 'react-dom'
 import {ReactEvents} from './events'
@@ -101,6 +101,7 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
           const fn = function (fn, other) {
             return oriUseEffectFn(function (...args) {
               Responsive.curRT.setNodeInfoId(curNodeInfo.id)
+
               let rtn
               try {
                 //unstable_batchedUpdates(() => {
@@ -143,7 +144,7 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
     //   console.log('clear:::>>>>',Responsive.getCurUpdater())
     // }
 
-    useEffect(()=>{
+    useLayoutEffect(()=>{
 //console.log('useEffect...',curNodeInfo.name)
       Responsive.setCurUpdater(void 0)//clear TODO
       //console.log('>>>>',Responsive.getCurUpdater())

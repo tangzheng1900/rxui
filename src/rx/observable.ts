@@ -198,7 +198,7 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
           }
         }
         //
-        // if(prop==='_points'){
+        // if(prop==='length'||'columns'){
         //   debugger
         // }
 

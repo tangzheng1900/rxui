@@ -55,9 +55,9 @@ export default function implement<T>(typeClass, impl, config: T_PipeCfg,updater)
       try {
         fAry = searchGetter('implement', typeClass, config.expectTo, node, pro)
       } catch (ex) {
-        if (!fn) {
-          throw ex
-        }
+        // if (!fn) {
+        //   throw ex////TODO Test
+        // }
         fAry = []
         //Not found
       }
@@ -69,13 +69,21 @@ export default function implement<T>(typeClass, impl, config: T_PipeCfg,updater)
         }
       }
 
-      return (...args) => {
-        fn && fAry.push(fn)
-        let ary = []
-        fAry.forEach(processer => {
-          ary.push(processer(...args))
-        })
-        return ary.length == 1 ? ary[0] : ary
+      fn && fAry.push(fn);
+
+      if(fAry.length>0){
+        return (...args) => {
+          let ary = []
+          fAry.forEach(processer => {
+            ary.push(processer(...args))
+          })
+          return ary.length == 1 ? ary[0] : ary
+        }
+      }else{
+        return ()=>{
+          console.warn(`No implements found for(${pro})`)
+          //throw new Error(`No implements found for(${pro})`)
+        }
       }
     }
 
