@@ -118,7 +118,7 @@ export function antiShaking() {
 const Global = {}
 
 export function regGlobalObject<T>(name, val: T): T {
-  const GLOBAL = window || global || Global
+  const GLOBAL = typeof (window) === 'object' ? window : typeof (global) === 'object' ? global : Global
 
   let rtn: T
   if (GLOBAL) {
