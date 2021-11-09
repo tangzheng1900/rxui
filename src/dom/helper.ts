@@ -9,6 +9,7 @@
  */
 import {Responsive} from "../rx/responsive";
 import {stopWatch} from "../index";
+import {WEBVIEW_HTMLElement} from "../constants";
 
 interface Dragable {
   event?: object
@@ -306,7 +307,7 @@ export function getPositionInKonva(node, relativeNode?) {
     const absPo = node.getAbsolutePosition()
     const stage = node.getStage()
 
-    if (stage && stage.content instanceof HTMLElement) {
+    if (stage && stage.content instanceof WEBVIEW_HTMLElement) {
       const po = stage.content.getBoundingClientRect()
       //console.timeEnd('start')
       return {x: absPo.x + po.left, y: absPo.y + po.top, w: node.width(), h: node.height()}

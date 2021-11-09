@@ -3,7 +3,7 @@ import {Responsive} from './responsive';
 import {antiShaking, getPropertyDescriptor, isSymbol, regGlobalObject} from '../util';
 import {clone} from '../model'
 import {snap} from "./snapshot";
-import {META_IGNORE} from "../constants";
+import {META_IGNORE, WEBVIEW_HTMLElement, WEBVIEW_SVGElement} from "../constants";
 import {ObservableNotFoundErr} from "./errors";
 
 const IS_OBSERVABLE_OBJECT = '__observable__'
@@ -347,8 +347,8 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
 
           if (typeof value === 'object'
             && value
-            && !(value instanceof HTMLElement
-              || value instanceof SVGElement
+            && !(value instanceof WEBVIEW_HTMLElement
+              || value instanceof WEBVIEW_SVGElement
               || value instanceof RegExp
               || value['$$typeof']//React element
               || value['nodeType']&&value['_id']//Konvajs node
