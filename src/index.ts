@@ -1,6 +1,6 @@
 ﻿import pkg from '../package.json'
 
-console.log(`--> ${pkg.name}@${pkg.version} <--`)
+console.log(`%c ${pkg.name} %c@${pkg.version}`,`color:#FFF;background:#fa6400`,``,``)
 
 import useObservable from './rx/useObservable'
 import useComputed from './rx/useComputed'
@@ -41,7 +41,7 @@ export {dump, load, recycle, clone, ignore} from './model'
 
 //-------------------------------------------------------------------------
 
-export {dragable} from './dom/helper'
+export {dragable,getPositionInKonva,getPosition} from './dom/helper'
 export {evt} from './dom/events'
 
 export {uuid} from './util'

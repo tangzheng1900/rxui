@@ -202,8 +202,6 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
         //   debugger
         // }
 
-        const namespace = parentNS + (prop.match(/^\d+$/) ? `[${prop}]` : ('.' + prop))
-
         let value
         const descr = getPropertyDescriptor(target, prop);
         if (descr && descr.get) {//getter
@@ -216,6 +214,11 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
           value = target[prop]
         }
 
+        // if(value instanceof HTMLElement){
+        //   return value
+        // }
+
+        const namespace = parentNS + (prop.match(/^\d+$/) ? `[${prop}]` : ('.' + prop))
         if (value === void 0 && isExpectTo && parentNS === '') {//Abstract method,invoke emitTo's implements
           // if(thenEmitToFn){
           //   return (...args) => {
@@ -225,10 +228,10 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
 
           agent.push(namespace, prop)
 
-          if(thenEmitToFn){
+          if (thenEmitToFn) {
             const fnAry = findImplInPipe(typeClass, prop, thenEmitToFn())
 
-            if(Array.isArray(fnAry)){
+            if (Array.isArray(fnAry)) {
               return (...args) => {
                 let ary = []
                 fnAry.forEach(processer => {
@@ -236,7 +239,7 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
                 })
                 return ary.length == 1 ? ary[0] : ary
               }
-            }else{
+            } else {
               return fnAry
             }
 
@@ -307,7 +310,11 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
                 if (target instanceof Date || target instanceof Set || target instanceof Map) {
                   return target[prop].call(target, ...args)
                 } else {
-                  return target[prop].call(receiver, ...args)
+                  try {
+                    return target[prop].call(receiver, ...args)
+                  } catch (ex) {
+                    return target[prop](...args)
+                  }
                 }
               } catch (ex) {
                 throw ex
@@ -344,6 +351,7 @@ export default function observable<T>(source: (new() => T) | T, typeClass: objec
               || value instanceof SVGElement
               || value instanceof RegExp
               || value['$$typeof']//React element
+              || value['nodeType']&&value['_id']//Konvajs node
             )) {
             return ValCache.get(prop, value,
               () => {
@@ -596,8 +604,8 @@ function findImplInPipe(typeClass, pro, thenEmitTo) {
       // })
       // return ary.length == 1 ? ary[0] : ary
     }
-  // else {
-  //     throw new Error(`No implements found for(${pro})`)
-  //   }
+    // else {
+    //     throw new Error(`No implements found for(${pro})`)
+    //   }
   }
 }

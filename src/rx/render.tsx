@@ -1,9 +1,9 @@
-﻿import React, {memo, ReactElement, useCallback, useEffect,useLayoutEffect, useMemo, useState} from 'react'
+﻿import React, {memo, ReactElement, useCallback, useEffect, useLayoutEffect, useMemo, useState} from 'react'
 import {Responsive} from './responsive'
 import {render as reactDomRender, Renderer, unstable_batchedUpdates} from 'react-dom'
 import {ReactEvents} from './events'
 import {regGlobalObject, uuid} from '../util';
-import {T_NodeInfo} from '../../types';
+import {evt, T_NodeInfo} from '../../types';
 
 const {ReactCurrentDispatcher, ReactCurrentOwner} = React['__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'];//Sorry bro,i have to use this fucking API
 
@@ -144,7 +144,7 @@ function enhance<T extends object>(component: React.FunctionComponent<T>, memoIt
     //   console.log('clear:::>>>>',Responsive.getCurUpdater())
     // }
 
-    useLayoutEffect(()=>{
+    useLayoutEffect(() => {
 //console.log('useEffect...',curNodeInfo.name)
       Responsive.setCurUpdater(void 0)//clear TODO
       //console.log('>>>>',Responsive.getCurUpdater())
@@ -288,6 +288,8 @@ function realRender(render, ...args): Renderer {
               const infoId = curNodeInfo.id
               //const nodeInfoForRender = CurrentNodeInfo.current
 
+              let nowEvtType
+
               ReactEvents.forEach(event => {
                 let fn = props[event]
                 if (typeof fn === 'function') {
@@ -299,8 +301,38 @@ function realRender(render, ...args): Renderer {
 
                     let rtn
                     unstable_batchedUpdates(() => {
-                      //console.log(Math.random())
-                      rtn = fn(...args)
+                      const nargs = [...args]
+                      if (nargs.length > 0) {
+                        const e = nargs[0]
+                        const ntype = e?.type
+                        if(nowEvtType){//Contextmenu and click may invoked together
+                          if(e){//Cancel bubble
+                            if (typeof e.stopPropagation === 'function') {
+                              e.stopPropagation()
+                            } else if (typeof e.evt?.stopPropagation === 'function') {
+                              e.evt.stopPropagation()
+                              e.cancelBubble = true
+                            }
+                          }
+                          return
+                        }
+                        nowEvtType = ntype
+
+                        //For konva
+                        // if (typeof nargs[0] === 'object' && nargs[0].evt && nargs[0].evt instanceof MouseEvent) {
+                        //   const to = nargs[0]
+                        //   nargs[0] = {target:to.target,currentTarget:to.currentTarget}
+                        //   Object.setPrototypeOf(nargs[0],to.evt)
+                        //   // nargs[0] = to.evt
+                        //   // nargs[0].target = to.target
+                        //   // nargs[0].currentTarget = to.currentTarget
+                        // }
+                      }
+                      try {
+                        rtn = fn(...args)
+                      } finally {
+                        setTimeout(v => nowEvtType = void 0)
+                      }
                     })
                     Responsive.curRT.clear()//Cancel it
 
