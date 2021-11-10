@@ -288,7 +288,7 @@ function realRender(render, ...args): Renderer {
               const infoId = curNodeInfo.id
               //const nodeInfoForRender = CurrentNodeInfo.current
 
-              let nowEvtType
+              //let nowEvtType
 
               ReactEvents.forEach(event => {
                 let fn = props[event]
@@ -301,37 +301,37 @@ function realRender(render, ...args): Renderer {
 
                     let rtn
                     unstable_batchedUpdates(() => {
-                      const nargs = [...args]
-                      if (nargs.length > 0) {
-                        const e = nargs[0]
-                        const ntype = e?.type
-                        if(nowEvtType){//Contextmenu and click may invoked together
-                          if(e){//Cancel bubble
-                            if (typeof e.stopPropagation === 'function') {
-                              e.stopPropagation()
-                            } else if (typeof e.evt?.stopPropagation === 'function') {
-                              e.evt.stopPropagation()
-                              e.cancelBubble = true
-                            }
-                          }
-                          return
-                        }
-                        nowEvtType = ntype
-
-                        //For konva
-                        // if (typeof nargs[0] === 'object' && nargs[0].evt && nargs[0].evt instanceof MouseEvent) {
-                        //   const to = nargs[0]
-                        //   nargs[0] = {target:to.target,currentTarget:to.currentTarget}
-                        //   Object.setPrototypeOf(nargs[0],to.evt)
-                        //   // nargs[0] = to.evt
-                        //   // nargs[0].target = to.target
-                        //   // nargs[0].currentTarget = to.currentTarget
-                        // }
-                      }
+                      //const nargs = [...args]
+                      // if (nargs.length > 0) {
+                      //   const e = nargs[0]
+                      //   const ntype = e?.type
+                      //   if(nowEvtType){//Contextmenu and click may invoked together
+                      //     if(e){//Cancel bubble
+                      //       if (typeof e.stopPropagation === 'function') {
+                      //         e.stopPropagation()
+                      //       } else if (typeof e.evt?.stopPropagation === 'function') {
+                      //         e.evt.stopPropagation()
+                      //         e.cancelBubble = true
+                      //       }
+                      //     }
+                      //     return
+                      //   }
+                      //   nowEvtType = ntype
+                      //
+                      //   //For konva
+                      //   // if (typeof nargs[0] === 'object' && nargs[0].evt && nargs[0].evt instanceof MouseEvent) {
+                      //   //   const to = nargs[0]
+                      //   //   nargs[0] = {target:to.target,currentTarget:to.currentTarget}
+                      //   //   Object.setPrototypeOf(nargs[0],to.evt)
+                      //   //   // nargs[0] = to.evt
+                      //   //   // nargs[0].target = to.target
+                      //   //   // nargs[0].currentTarget = to.currentTarget
+                      //   // }
+                      // }
                       try {
                         rtn = fn(...args)
                       } finally {
-                        setTimeout(v => nowEvtType = void 0)
+                        //setTimeout(v => nowEvtType = void 0)
                       }
                     })
                     Responsive.curRT.clear()//Cancel it

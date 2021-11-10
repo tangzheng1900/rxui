@@ -1,13 +1,14 @@
 ﻿import {HASHCODE} from './state-common';
-import {genFnName, uuid} from '../util';
+import {genFnName, regGlobalObject, uuid} from '../util';
 import {META_IGNORE} from "../constants";
 
 type Clz = new (...args: any[]) => object
 
 const MetaKey = '_rxui_meta_'
 
-export const SerializedReg = global['_rxui_serializedReg_'] || (global['_rxui_serializedReg_'] = {})
+//export const SerializedReg = global['_rxui_serializedReg_'] || (global['_rxui_serializedReg_'] = {})
 
+export const SerializedReg = regGlobalObject('_rxui_serializedReg_',{})
 
 export function Ignore(fn: Function, prop): any {
   let descr = Object.getOwnPropertyDescriptor(fn, META_IGNORE)
